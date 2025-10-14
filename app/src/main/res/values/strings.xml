@@ -1,3 +1,9 @@
 <resources>
-    <string name="app_name">Erronka1</string>
+    <string name="app_name">GymApp</string>
+    <string name="Username">Erabiltzailea:</string>
+    <string name="Password">Pasahitza:</string>
+    <string name="Login">Hasi saioa</string>
+    <string name="Client">Bezeroa</string>
+    <string name="Trainer">Entrenatzailea</string>
+    <string name="logo">Logo</string>
 </resources>

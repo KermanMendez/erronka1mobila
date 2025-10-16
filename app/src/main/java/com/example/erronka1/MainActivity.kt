@@ -33,9 +33,11 @@ class MainActivity : AppCompatActivity() {
         //initSpinner()
 
         binding.btnLogin.setOnClickListener { view: View ->
-            val dialog = Dialog(this)
-            dialog.setContentView(R.layout.user_profile)
-            dialog.show()
+//            val dialog = Dialog(this)
+//            dialog.setContentView(R.layout.user_profile)
+//            dialog.show()
+            val intent = android.content.Intent(this, HomeClient::class.java)
+            startActivity(intent)
         }
     }
     fun initSpinner() {

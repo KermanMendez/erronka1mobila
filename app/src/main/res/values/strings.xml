@@ -9,4 +9,14 @@
     <string name="dark_mode">Modo oscuro</string>
     <string name="dark_mode_description">Activa el modo oscuro para un cambio visual</string>
     <string name="language">Hizkuntza</string>
+
+    <!--Workout data-->
+    <string name="workout_name">Izena</string>
+    <string name="level">Maila</string>
+    <string name="total_time">Denb guzt</string>
+    <string name="expected_time">Aurre denb</string>
+    <string name="date">Data</string>
+    <string name="done_exercises_porcent">Ariketak %</string>
+
+
 </resources>

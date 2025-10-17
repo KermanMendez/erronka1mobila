@@ -40,4 +40,8 @@
 
     <string name="order_arrow">Ordenatu</string>
 
+    <string name="create_workout">Workout Berria</string>
+    <string name="edit_workout">Editatu Workout</string>
+    <string name="delete_workout">Ezabatu workout</string>
+
 </resources>

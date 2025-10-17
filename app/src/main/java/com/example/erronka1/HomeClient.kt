@@ -27,8 +27,7 @@ class HomeClient : AppCompatActivity() {
             val intent = android.content.Intent(this, Login::class.java)
             startActivity(intent)
         }
-        binding.ivUpDownArrow.setOnClickListener {
-
+        binding.llOrder.setOnClickListener {
             if (up) {
                 binding.ivUpDownArrow.setImageResource(R.drawable.outline_keyboard_arrow_down_24)
                 up = false

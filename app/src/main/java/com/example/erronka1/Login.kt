@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.erronka1.databinding.LoginBinding
+import kotlin.collections.get
 
 class Login : AppCompatActivity() {
 
@@ -35,32 +36,25 @@ class Login : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        initSpinner()
+        //initSpinner()
         initListeners()
 
 
     }
 
-    fun initSpinner() {
-        val spinner = findViewById<Spinner>(R.id.spLanguages)
+    private fun initSpinnerFromUserProfileBinding() {
+        // debe llamarse después de setContentView(binding.root)
+        val userProfileBinding = com.example.erronka1.databinding.UserProfileBinding.inflate(layoutInflater)
+        val spinner = userProfileBinding.spLanguages
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, language)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-
         spinner.adapter = adapter
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                // Guardar la selección para usarla en la app si hace falta
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 selectedLanguageChoice = language[position]
-                // Opcional: mostrar breve confirmación
                 Toast.makeText(this@Login, "Idioma: $selectedLanguageChoice", Toast.LENGTH_SHORT).show()
             }
-
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
     }

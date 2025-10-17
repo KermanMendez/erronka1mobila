@@ -35,7 +35,9 @@ class HomeClient : AppCompatActivity() {
                 binding.ivUpDownArrow.setImageResource(R.drawable.outline_keyboard_arrow_up_24)
                 up = true
             }
+        binding.ivProfile.setOnClickListener {
 
+        }
         }
     }
 }

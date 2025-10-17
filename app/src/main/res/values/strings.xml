@@ -19,6 +19,7 @@
     <string name="btnLogin">Sartu</string>
     <string name="btnSignUp">Erregistratu</string>
     <string name="back">Atzera</string>
+<<<<<<< HEAD
 
     <!--Register-->
     <string name="register_title">Erregistratu</string>
@@ -34,5 +35,9 @@
 
     <string name="register_email_hint">email@gmail.com</string>
 
+=======
+    <string name="showPassword">Erakutsi</string>
+    <string name="rememberMe">Gorde saioa</string>
+>>>>>>> aef05e0f0b2eef2cebeb076b69c8994b5927579a
 
 </resources>

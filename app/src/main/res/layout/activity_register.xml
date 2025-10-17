@@ -12,13 +12,15 @@
 
     <TextView
         android:id="@+id/tvErregistratu"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:text="@string/register_title"
-        android:textSize="20sp"
-        android:layout_marginBottom="10dp"/>
+        android:textSize="30sp"
+        android:background="@drawable/rounded_borders"
+        android:textColor="@color/white"
+        android:padding="10dp"/>
 
 
     <TextView
@@ -29,7 +31,8 @@
         app:layout_constraintStart_toStartOf="parent"
         android:text="@string/register_username"
         android:labelFor="@+id/etUsername"
-        android:textSize="18sp"/>
+        android:textSize="18sp"
+        android:layout_marginTop="10dp"/>
     <EditText
         android:id="@+id/etUsername"
         android:layout_width="match_parent"
@@ -160,6 +163,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/rgBezeroaEntrenatzailea"
         app:layout_constraintStart_toStartOf="parent"
+        android:background="@drawable/rounded_borders"
         android:text="@string/register_btn"
         android:layout_marginTop="16dp"/>
 

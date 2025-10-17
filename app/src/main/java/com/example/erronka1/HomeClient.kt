@@ -11,6 +11,7 @@ class HomeClient : AppCompatActivity() {
 
     private lateinit var binding: ActivityHomeClientBinding
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -21,9 +22,21 @@ class HomeClient : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        var up = false
         binding.ivBacktoLogin.setOnClickListener {
             val intent = android.content.Intent(this, Login::class.java)
             startActivity(intent)
+        }
+        binding.ivUpDownArrow.setOnClickListener {
+
+            if (up) {
+                binding.ivUpDownArrow.setImageResource(R.drawable.outline_keyboard_arrow_down_24)
+                up = false
+            } else {
+                binding.ivUpDownArrow.setImageResource(R.drawable.outline_keyboard_arrow_up_24)
+                up = true
+            }
+
         }
     }
 }

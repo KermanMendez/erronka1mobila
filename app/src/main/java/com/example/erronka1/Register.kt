@@ -50,6 +50,11 @@ class Register : AppCompatActivity() {
 
     private fun initListeners() {
 
+        binding.btnBack.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
+
         binding.btnBirthdate.setOnClickListener {
             val cal = Calendar.getInstance()
             val y = cal.get(Calendar.YEAR)
@@ -86,10 +91,10 @@ class Register : AppCompatActivity() {
             FirebaseSingleton.auth.createUserWithEmailAndPassword(etEmail, etPassword)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        Log.d("Register", "Firebase auth: createUserWithEmailAndPassword success")
+
                         // Obtener UID del usuario creado; prefer the task result then fallback to currentUser
                         val uid = task.result?.user?.uid ?: FirebaseAuth.getInstance().currentUser?.uid
-                        Log.d("Register", "Resolved uid=$uid")
+
                         if (uid == null) {
                             Toast.makeText(this, "Usuario creado baina UID hutsa", Toast.LENGTH_LONG).show()
                             return@addOnCompleteListener
@@ -106,12 +111,10 @@ class Register : AppCompatActivity() {
 
                         // Guardar en Firestore en collection 'users' con documento = uid (usa FirebaseSingleton.db)
                         val db = FirebaseSingleton.db
-                        Log.d("Register", "Attempting Firestore write: users/$uid -> $user")
                         db.collection("users")
                             .document(uid)
                             .set(user)
                             .addOnSuccessListener {
-                                Log.d("Register", "Firestore: successfully wrote user document uid=$uid")
                                 // Read back immediately to verify the document exists
                                 db.collection("users").document(uid).get()
                                     .addOnSuccessListener { snapshot ->
@@ -125,9 +128,6 @@ class Register : AppCompatActivity() {
                                 startActivity(intent)
                             }
                             .addOnFailureListener { e ->
-                                // Log full stacktrace to help debugging (e.g., PERMISSION_DENIED)
-                                Log.e("Register", "Firestore: failed to write user document uid=$uid, message=${e.message}")
-                                Log.e("Register", e.stackTraceToString())
                                 // If it's a FirestoreException, check the code for permission issues
                                 if (e is FirebaseFirestoreException) {
                                     if (e.code == FirebaseFirestoreException.Code.PERMISSION_DENIED) {

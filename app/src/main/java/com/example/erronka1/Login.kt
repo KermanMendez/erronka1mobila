@@ -34,13 +34,13 @@ class Login : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        initSpinner()
+       // initSpinner()
         initListeners()
 
 
     }
 
-    fun initSpinner() {
+   /* fun initSpinner() {
         val spinner = findViewById<Spinner>(R.id.spLanguages)
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, language)
@@ -62,7 +62,7 @@ class Login : AppCompatActivity() {
 
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
-    }
+    }*/
 
     private fun initListeners() {
         binding.btnLogin.setOnClickListener {

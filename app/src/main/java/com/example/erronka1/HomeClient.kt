@@ -22,7 +22,7 @@ class HomeClient : AppCompatActivity() {
             insets
         }
         binding.ivBacktoLogin.setOnClickListener {
-            val intent = android.content.Intent(this, MainActivity::class.java)
+            val intent = android.content.Intent(this, Login::class.java)
             startActivity(intent)
         }
     }

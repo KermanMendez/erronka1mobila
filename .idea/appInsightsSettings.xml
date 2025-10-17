@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.erronka1" />
+                  <option name="mobileSdkAppId" value="1:122026935823:android:668c43373448e360c7857a" />
+                  <option name="projectId" value="gymapp-5b215" />
+                  <option name="projectNumber" value="122026935823" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

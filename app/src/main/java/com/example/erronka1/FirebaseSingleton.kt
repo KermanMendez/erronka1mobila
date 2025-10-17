@@ -1,13 +1,10 @@
 package com.example.erronka1
 
-import android.annotation.SuppressLint
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.firestore
+import com.google.firebase.firestore.FirebaseFirestore
 
 object FirebaseSingleton {
 
-    val auth = FirebaseAuth.getInstance()
-    @SuppressLint("StaticFieldLeak")
-    val db = Firebase.firestore
+    val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
+    val db: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
 }

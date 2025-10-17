@@ -3,8 +3,6 @@
     <string name="Username">Erabiltzailea:</string>
     <string name="Password">Pasahitza:</string>
     <string name="Login">Hasi saioa</string>
-    <string name="Client">Bezeroa</string>
-    <string name="Trainer">Entrenatzailea</string>
     <string name="logo">Logo</string>
     <string name="dark_mode">Modo oscuro</string>
     <string name="dark_mode_description">Activa el modo oscuro para un cambio visual</string>
@@ -21,6 +19,20 @@
     <string name="btnLogin">Sartu</string>
     <string name="btnSignUp">Erregistratu</string>
     <string name="back">Atzera</string>
+
+    <!--Register-->
+    <string name="register_title">Erregistratu</string>
+    <string name="register_username">Erabiltzaile izena:</string>
+    <string name="register_lastname1">Lehenengo Abizena:</string>
+    <string name="register_lastname2">Bigarren Abizena:</string>
+    <string name="register_password">Pasahitza:</string>
+    <string name="register_confirm_password">Pasahitza berretsi:</string>
+    <string name="register_email">Emaila:</string>
+    <string name="Client">Bezeroa</string>
+    <string name="Trainer">Entrenatzailea</string>
+    <string name="register_btn">Erregistratu</string>
+
+    <string name="register_email_hint">email@gmail.com</string>
 
 
 </resources>

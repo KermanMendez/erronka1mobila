@@ -21,6 +21,7 @@
     <string name="btnLogin">Sartu</string>
     <string name="btnSignUp">Erregistratu</string>
     <string name="back">Atzera</string>
-
+    <string name="showPassword">Erakutsi</string>
+    <string name="rememberMe">Gorde saioa</string>
 
 </resources>

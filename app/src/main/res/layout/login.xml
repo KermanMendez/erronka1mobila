@@ -1,120 +1,155 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Login"
-    android:gravity="top"
-    android:orientation="vertical">
-
-    <TextView
-        android:id="@+id/AppTitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/app_name"
-        android:textSize="30sp"
-        android:padding="20dp"
-        android:textColor="@color/white"
-        android:background="@color/purple_200"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/Login"
-        android:textSize="20sp"
-        android:layout_marginTop="25dp"
-        android:layout_marginStart="10dp"/>
-
-    <!--<RadioGroup
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <RadioButton
-            android:id="@+id/rbClient"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/Client"
-            android:checked="true"/>
-        <RadioButton
-            android:id="@+id/rbTrainer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/Trainer"
-            android:layout_marginStart="10dp"/>
-    </RadioGroup>-->
+    tools:context=".Login">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="start"
-        android:layout_marginStart="10dp">
+        android:id="@+id/content_main"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:gravity="top"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/AppTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textSize="30sp"
+            android:padding="20dp"
+            android:textColor="@color/white"
+            android:background="@color/purple_200"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/Login"
+            android:textSize="20sp"
+            android:layout_marginTop="25dp"
+            android:layout_marginStart="10dp"/>
+
+        <!--<RadioGroup
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <RadioButton
+                android:id="@+id/rbClient"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/Client"
+                android:checked="true"/>
+            <RadioButton
+                android:id="@+id/rbTrainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/Trainer"
+                android:layout_marginStart="10dp"/>
+        </RadioGroup>-->
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/Username"
-                android:textSize="15sp"
-                android:width="90dp"
-                android:labelFor="@id/username"/>
-            <EditText
-                android:id="@+id/username"
+            android:orientation="vertical"
+            android:gravity="start"
+            android:layout_marginStart="10dp">
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="text"
-                android:autofillHints="UserName"
-                android:layout_marginEnd="10dp"/>
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/Password"
-                android:textSize="15sp"
-                android:width="90dp"
-                android:labelFor="@id/password"/>
-            <EditText
-                android:id="@+id/password"
+                android:orientation="horizontal"
+                android:gravity="center">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/Username"
+                    android:textSize="15sp"
+                    android:width="90dp"
+                    android:labelFor="@id/username"/>
+                <EditText
+                    android:id="@+id/username"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:autofillHints="UserName"
+                    android:layout_marginEnd="10dp"/>
+            </LinearLayout>
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textPassword"
-                android:autofillHints="UserPassword"
-                android:layout_marginEnd="10dp"/>
+                android:orientation="horizontal"
+                android:gravity="center">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/Password"
+                    android:textSize="15sp"
+                    android:width="90dp"
+                    android:labelFor="@id/password"/>
+                <EditText
+                    android:id="@+id/password"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword"
+                    android:autofillHints="UserPassword"
+                    android:layout_marginEnd="10dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:gravity="start">
+                <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:id="@+id/showPassword"
+                    android:text="@string/showPassword"
+                    android:layout_marginStart="10dp"/>
+                <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:id="@+id/rememberMe"
+                    android:text="@string/rememberMe"
+                    android:layout_marginStart="10dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+                <Button
+                    android:id="@+id/btnLogin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/Login"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"/>
+
+                <Button
+                    android:id="@+id/btnBack"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/back"
+                    android:layout_marginBottom="20dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"/>
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:src="@mipmap/logo"
+                    android:minHeight="300dp"
+                    android:contentDescription="@string/logo"/>
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
-
-    <Button
-        android:id="@+id/btnLogin"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/Login"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="20dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"/>
-
-    <Button
-        android:id="@+id/btnBack"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/back"
-        android:layout_marginBottom="20dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"/>
-
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:src="@mipmap/logo"
-        android:minHeight="300dp"
-        android:contentDescription="@string/logo"/>
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

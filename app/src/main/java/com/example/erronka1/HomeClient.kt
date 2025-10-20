@@ -100,15 +100,20 @@ class HomeClient : AppCompatActivity() {
         )
 
         val workout: Workout = Workout(
+            id = "0Q94scUmahhEyKC6OutN",
             title = "Full Body Beginner",
             description = "A beginner-friendly full body workout.",
             level = 1,
             ariketak = gehitu
         )
 
+        workout.title = "Cambiado desde app"
 
 
-        addWorkoutWithExcercises(workout)
+
+        //addWorkoutWithExcercises(workout)
+        //editWorkout(workout)
+        //deleteWorkout(workout.id)
     }
 
     override fun onDestroy() {

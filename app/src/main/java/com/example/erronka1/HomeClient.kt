@@ -141,7 +141,7 @@ class HomeClient : AppCompatActivity() {
             }
     }
 
-    // kotlin
+
     private fun addWorkoutWithExcercises(workout: Workout) {
         val db = FirebaseSingleton.db
         val docRef = db.collection("workouts").document() // ID generado
@@ -163,6 +163,17 @@ class HomeClient : AppCompatActivity() {
             .addOnFailureListener { e ->
                 Log.w("HomeClient", "Error añadiendo workout y exercises", e)
             }
+    }
+
+    private fun editWorkout(workout: Workout) {
+        val db = FirebaseSingleton.db
+        val workoutRef = db.collection("workouts").whereEqualTo("title",workout.title)
+
+        /* workoutRef.update(
+            "title", workout.title,
+            "description", workout.description,
+            "level", workout.level
+        )*/
     }
 
 }

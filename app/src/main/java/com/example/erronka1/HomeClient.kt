@@ -8,7 +8,12 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.viewmodel.CreationExtras
+import com.example.erronka1.Ariketa
 import com.example.erronka1.databinding.ActivityHomeClientBinding
+import kotlin.collections.List
+import kotlin.math.log
+import kotlin.text.set
 
 class HomeClient : AppCompatActivity() {
 
@@ -87,6 +92,25 @@ class HomeClient : AppCompatActivity() {
             val intent = Intent(this, Login::class.java)
             startActivity(intent)
         }
+
+        showWorkouts()
+        val gehitu: List<Ariketa> = listOf(
+            Ariketa(izena = "Jumping Jacks", reps = 20, sets = 3),
+            Ariketa(izena = "Push-ups", reps = 10, sets = 3),
+            Ariketa(izena = "Bodyweight Squats", reps = 15, sets = 3),
+            Ariketa(izena = "Plank", reps = 30, sets = 3)
+        )
+
+        val workout: Workout = Workout(
+            title = "Full Body Beginner",
+            description = "A beginner-friendly full body workout.",
+            level = 1,
+            ariketak = gehitu
+        )
+
+
+
+        addWorkoutWithExcercises(workout)
     }
 
     override fun onDestroy() {
@@ -94,4 +118,51 @@ class HomeClient : AppCompatActivity() {
         hideRunnable?.let { binding.splashOverlay.removeCallbacks(it) }
         super.onDestroy()
     }
+
+    private fun showWorkouts() {
+        // Get user lvl to filter workouts
+        val uid = FirebaseSingleton.auth.currentUser?.uid ?: return
+        // FirebaseSingleton.db.collection("users").document(uid).get()
+        val db = FirebaseSingleton.db
+
+        val workoutsMap = mutableMapOf<String, Workout>()
+        db.collection("workouts")
+            .get()
+            .addOnSuccessListener { result ->
+                for (document in result) {
+                    val workout = document.toObject(Workout::class.java)
+                    workoutsMap[document.id] = workout
+                   Log.d("HomeClient", "Workout loaded: ${document.id} ->) $workout")
+                }
+            Log.d("HomeClient", "Workout size = ${workoutsMap.size} ")
+            }
+            .addOnFailureListener { exception ->
+                Log.w("HomeClient", "Error getting workouts: ", exception)
+            }
+    }
+
+    // kotlin
+    private fun addWorkoutWithExcercises(workout: Workout) {
+        val db = FirebaseSingleton.db
+        val docRef = db.collection("workouts").document() // ID generado
+        val batch = db.batch()
+
+        // `ariketak` está excluido por @get:Exclude, por tanto solo se subirán los campos restantes
+        batch.set(docRef, workout)
+
+        val exercises = workout.ariketak
+        exercises.forEach { ariketa ->
+            val exRef = docRef.collection("exercises").document() // doc con ID auto
+            batch.set(exRef, ariketa)
+        }
+
+        batch.commit()
+            .addOnSuccessListener {
+                Log.d("HomeClient", "Workout y ${exercises.size} exercises añadidos con ID: ${docRef.id}")
+            }
+            .addOnFailureListener { e ->
+                Log.w("HomeClient", "Error añadiendo workout y exercises", e)
+            }
+    }
+
 }

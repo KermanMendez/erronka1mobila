@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.erronka1.databinding.ActivityRegisterBinding
+import com.example.erronka1.modelo.User
 
 class Register : AppCompatActivity() {
 
@@ -107,7 +108,7 @@ class Register : AppCompatActivity() {
                             etBirthdate,
                             rbTrainer,
 
-                        )
+                            )
 
                         // Guardar en Firestore en collection 'users' con documento = uid (usa FirebaseSingleton.db)
                         val db = FirebaseSingleton.db

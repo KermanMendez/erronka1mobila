@@ -2,6 +2,7 @@ package com.example.erronka1
 
 import android.app.Dialog
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -10,8 +11,12 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.erronka1.databinding.ActivityHomeClientBinding
 import com.example.erronka1.databinding.ActivityUserProfileBinding
+import com.example.erronka1.modelo.Ariketa
+import com.example.erronka1.modelo.Workout
+import com.example.erronka1.rvWorkout.WorkoutAdapter
 
 class HomeClient : AppCompatActivity() {
 
@@ -19,6 +24,7 @@ class HomeClient : AppCompatActivity() {
 
     private var language = listOf("Español", "Euskara", "English")
     private var selectedLanguageChoice: String = language[0]
+    private lateinit var workoutAdapter: WorkoutAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,7 +42,8 @@ class HomeClient : AppCompatActivity() {
             startActivity(intent)
         }
         binding.llOrder.setOnClickListener {
-            print("kaka")
+            print("Clicked")
+            showWorkouts()
             if (up) {
                 binding.ivUpDownArrow.setImageResource(R.drawable.outline_keyboard_arrow_down_24)
                 up = false
@@ -46,9 +53,37 @@ class HomeClient : AppCompatActivity() {
             }
         }
         binding.ivProfile.setOnClickListener {
+            println("--------------------------------------------------------")
             showUserProfileDialog()
-
         }
+
+        val gehitu: List<Ariketa> = listOf(
+            Ariketa(izena = "Jumping Jacks", reps = 20, sets = 3),
+            Ariketa(izena = "Push-ups", reps = 10, sets = 3),
+            Ariketa(izena = "Bodyweight Squats", reps = 15, sets = 3),
+            Ariketa(izena = "Plank", reps = 30, sets = 3)
+        )
+
+        val workout: Workout = Workout(
+            title = "Full Body Beginner",
+            description = "A",
+            level = 1,
+            ariketak = gehitu
+        )
+        val workout2: Workout = Workout(
+            title = "Egunon",
+            description = "Oso txarto",
+            level = 2,
+            ariketak = gehitu
+        )
+        val workoutList: List<Workout> = listOf(workout, workout2)
+
+        workoutAdapter = WorkoutAdapter(workoutList ) { position ->
+            val selectedWorkout = workoutList[position]
+            Toast.makeText(this, "Selected workout: ${selectedWorkout.title}", Toast.LENGTH_SHORT).show()
+        }
+        binding.rvTableWorkouts.layoutManager = LinearLayoutManager(this)
+        binding.rvTableWorkouts.adapter = workoutAdapter
     }
     private fun showUserProfileDialog() {
 
@@ -68,4 +103,26 @@ class HomeClient : AppCompatActivity() {
         dialog.setContentView(userBinding.root)
         dialog.show()
     }
+    private fun showWorkouts() {
+        // Get user lvl to filter workouts
+        val uid = FirebaseSingleton.auth.currentUser?.uid ?: return
+        // FirebaseSingleton.db.collection("users").document(uid).get()
+        val db = FirebaseSingleton.db
+
+        val workoutsMap = mutableMapOf<String, Workout>()
+        db.collection("workouts")
+            .get()
+            .addOnSuccessListener { result ->
+                for (document in result) {
+                    val workout = document.toObject(Workout::class.java)
+                    workoutsMap[document.id] = workout
+                    Log.d("HomeClient", "Workout loaded: ${document.id} ->) $workout")
+                }
+                Log.d("HomeClient", "Workout size = ${workoutsMap.size} ")
+            }
+            .addOnFailureListener { exception ->
+                Log.w("HomeClient", "Error getting workouts: ", exception)
+            }
+    }
+
 }

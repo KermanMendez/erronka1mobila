@@ -9,5 +9,4 @@ data class Workout(
     var level: Int = 0,
     var video: String = "",
     @get:Exclude var ariketak: List<Ariketa> = emptyList()
-
 )

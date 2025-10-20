@@ -21,8 +21,6 @@ class Login : AppCompatActivity() {
 
     private lateinit var binding: LoginBinding
 
-    private var language = listOf("Español", "Euskara", "English")
-    private var selectedLanguageChoice: String = language[0]
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,28 +34,12 @@ class Login : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        //initSpinner()
         initListeners()
 
 
     }
 
-    private fun initSpinnerFromUserProfileBinding() {
-        // debe llamarse después de setContentView(binding.root)
-        val userProfileBinding = com.example.erronka1.databinding.UserProfileBinding.inflate(layoutInflater)
-        val spinner = userProfileBinding.spLanguages
 
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, language)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinner.adapter = adapter
-        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                selectedLanguageChoice = language[position]
-                Toast.makeText(this@Login, "Idioma: $selectedLanguageChoice", Toast.LENGTH_SHORT).show()
-            }
-            override fun onNothingSelected(p0: AdapterView<*>?) {}
-        }
-    }
 
     private fun initListeners() {
         binding.btnLogin.setOnClickListener {

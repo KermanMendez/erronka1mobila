@@ -7,7 +7,6 @@ import android.util.Log
 import android.widget.Toast
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import java.util.Calendar
 import java.util.Locale
@@ -16,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.erronka1.databinding.ActivityRegisterBinding
+import com.example.erronka1.model.User
 
 class Register : AppCompatActivity() {
 
@@ -101,13 +101,15 @@ class Register : AppCompatActivity() {
                         }
 
                         val user = User(
+                            // TODO: Excluir el uid al insertar un usuario
+                            uid,
                             etUsername,
                             etLastname1,
                             etLastname2,
                             etBirthdate,
                             rbTrainer,
 
-                        )
+                            )
 
                         // Guardar en Firestore en collection 'users' con documento = uid (usa FirebaseSingleton.db)
                         val db = FirebaseSingleton.db

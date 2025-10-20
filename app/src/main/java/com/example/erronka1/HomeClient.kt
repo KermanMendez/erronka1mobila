@@ -8,12 +8,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.viewmodel.CreationExtras
-import com.example.erronka1.Ariketa
+import com.example.erronka1.model.Ariketa
 import com.example.erronka1.databinding.ActivityHomeClientBinding
+import com.example.erronka1.model.Workout
 import kotlin.collections.List
-import kotlin.math.log
-import kotlin.text.set
 
 class HomeClient : AppCompatActivity() {
 
@@ -167,13 +165,14 @@ class HomeClient : AppCompatActivity() {
 
     private fun editWorkout(workout: Workout) {
         val db = FirebaseSingleton.db
-        val workoutRef = db.collection("workouts").whereEqualTo("title",workout.title)
+        val workoutRef = db.collection("workouts").document(workout.id)
 
-        /* workoutRef.update(
+         workoutRef.update(
             "title", workout.title,
             "description", workout.description,
-            "level", workout.level
-        )*/
+            "level", workout.level,
+             "video", workout.video
+        )
     }
 
 }

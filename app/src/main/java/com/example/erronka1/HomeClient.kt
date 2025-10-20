@@ -129,6 +129,8 @@ class HomeClient : AppCompatActivity() {
             .addOnSuccessListener { result ->
                 for (document in result) {
                     val workout = document.toObject(Workout::class.java)
+                    // guardar el id del documento en el objeto para futuras actualizaciones
+                    workout.id = document.id
                     workoutsMap[document.id] = workout
                    Log.d("HomeClient", "Workout loaded: ${document.id} ->) $workout")
                 }
@@ -144,6 +146,9 @@ class HomeClient : AppCompatActivity() {
         val db = FirebaseSingleton.db
         val docRef = db.collection("workouts").document() // ID generado
         val batch = db.batch()
+
+        // asignamos el id generado al objeto (no se serializará por @get:Exclude)
+        workout.id = docRef.id
 
         // `ariketak` está excluido por @get:Exclude, por tanto solo se subirán los campos restantes
         batch.set(docRef, workout)
@@ -165,6 +170,12 @@ class HomeClient : AppCompatActivity() {
 
     private fun editWorkout(workout: Workout) {
         val db = FirebaseSingleton.db
+
+        if (workout.id.isBlank()) {
+            Log.w("HomeClient", "editWorkout: workout.id está vacío, no se puede actualizar")
+            return
+        }
+
         val workoutRef = db.collection("workouts").document(workout.id)
 
          workoutRef.update(
@@ -173,6 +184,31 @@ class HomeClient : AppCompatActivity() {
             "level", workout.level,
              "video", workout.video
         )
+        .addOnSuccessListener {
+            Log.d("HomeClient", "Workout actualizado correctamente id=${workout.id}")
+        }
+        .addOnFailureListener { e ->
+            Log.w("HomeClient", "Error actualizando workout id=${workout.id}", e)
+        }
+    }
+
+    private fun deleteWorkout(workoutId: String) {
+        val db = FirebaseSingleton.db
+
+        if (workoutId.isBlank()) {
+            Log.w("HomeClient", "deleteWorkout: workoutId está vacío, no se puede eliminar")
+            return
+        }
+
+        val workoutRef = db.collection("workouts").document(workoutId)
+
+        workoutRef.delete()
+            .addOnSuccessListener {
+                Log.d("HomeClient", "Workout eliminado correctamente id=$workoutId")
+            }
+            .addOnFailureListener { e ->
+                Log.w("HomeClient", "Error eliminando workout id=$workoutId", e)
+            }
     }
 
 }

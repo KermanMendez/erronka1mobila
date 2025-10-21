@@ -15,7 +15,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.erronka1.databinding.ActivityHomeClientBinding
 import com.example.erronka1.databinding.ActivityUserProfileBinding
 import com.example.erronka1.modelo.Ariketa
+import com.example.erronka1.modelo.Level
 import com.example.erronka1.modelo.Workout
+import com.example.erronka1.rvLevel.LevelAdapter
 import com.example.erronka1.rvWorkout.WorkoutAdapter
 
 class HomeClient : AppCompatActivity() {
@@ -23,8 +25,10 @@ class HomeClient : AppCompatActivity() {
     private lateinit var binding: ActivityHomeClientBinding
 
     private var language = listOf("Español", "Euskara", "English")
+    private var levels: List<Level> = listOf()
     private var selectedLanguageChoice: String = language[0]
     private lateinit var workoutAdapter: WorkoutAdapter
+    private lateinit var levelAdapter: LevelAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,11 +81,18 @@ class HomeClient : AppCompatActivity() {
             ariketak = gehitu
         )
         val workoutList: List<Workout> = listOf(workout, workout2)
+        levels = listOf(
+            Level(1),
+            Level(2),
+            Level(3)
+        )
 
-        workoutAdapter = WorkoutAdapter(workoutList ) { position ->
-            val selectedWorkout = workoutList[position]
-            Toast.makeText(this, "Selected workout: ${selectedWorkout.title}", Toast.LENGTH_SHORT).show()
-        }
+        levelAdapter = LevelAdapter(levels, {onItemCategoriaSelected(it) })
+        binding.rvLevels.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        binding.rvLevels.adapter = levelAdapter
+
+        workoutAdapter = WorkoutAdapter(workoutList) {}
         binding.rvTableWorkouts.layoutManager = LinearLayoutManager(this)
         binding.rvTableWorkouts.adapter = workoutAdapter
     }
@@ -123,6 +134,17 @@ class HomeClient : AppCompatActivity() {
             .addOnFailureListener { exception ->
                 Log.w("HomeClient", "Error getting workouts: ", exception)
             }
+    }
+
+    private fun onItemCategoriaSelected(position: Int){
+        levels[position].isSelected = !levels[position].isSelected
+        levelAdapter.notifyItemChanged(position)
+        updateTasks()
+    }
+    private fun updateTasks(){
+//        val selectedCategories: List<Categoria> = categorias.filter { it.isSelected }
+//        val newTasks = tareas.filter { selectedCategories.contains(categoria) }
+//        tareasAdapter.tareas = newTasks
     }
 
 }

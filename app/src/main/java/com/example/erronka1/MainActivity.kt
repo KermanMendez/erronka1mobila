@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun initBackup() {
+    /*private fun initBackup() {
         val db = FirebaseSingleton.db
         val backup = Backup()
         var workouts: List<Workout>? = null
@@ -117,5 +117,5 @@ class MainActivity : AppCompatActivity() {
         }.addOnFailureListener { e ->
             Log.e("MainActivity", "Error getting users: ", e)
         }
-    }
+    }*/
 }

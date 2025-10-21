@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.erronka1.db.FirebaseSingleton
 import com.example.erronka1.model.Ariketa
 import com.example.erronka1.databinding.ActivityHomeClientBinding
 import com.example.erronka1.model.Workout

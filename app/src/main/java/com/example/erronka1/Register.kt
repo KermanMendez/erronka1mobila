@@ -14,6 +14,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.erronka1.db.FirebaseSingleton
 import com.example.erronka1.databinding.ActivityRegisterBinding
 import com.example.erronka1.model.User
 

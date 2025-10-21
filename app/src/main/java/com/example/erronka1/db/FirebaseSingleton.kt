@@ -1,4 +1,4 @@
-package com.example.erronka1
+package com.example.erronka1.db
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore

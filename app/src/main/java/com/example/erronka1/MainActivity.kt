@@ -10,7 +10,6 @@ import com.example.erronka1.db.FirebaseSingleton
 import com.example.erronka1.databinding.ActivityMainBinding
 import com.example.erronka1.model.User
 import com.example.erronka1.model.Workout
-import com.example.erronka1.db.Backup
 
 class MainActivity : AppCompatActivity() {
 
@@ -29,7 +28,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         initListeners()
-        initBackup()
+        //initBackup()
 
 
 

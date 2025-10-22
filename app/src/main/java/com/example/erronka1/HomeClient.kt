@@ -8,11 +8,12 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import com.example.erronka1.db.FirebaseSingleton
 import com.example.erronka1.model.Ariketa
 import com.example.erronka1.databinding.ActivityHomeClientBinding
 import com.example.erronka1.model.Workout
-import kotlin.collections.List
+import com.example.erronka1.model.Historic
 
 class HomeClient : AppCompatActivity() {
 
@@ -69,7 +70,7 @@ class HomeClient : AppCompatActivity() {
                     val name = doc.getString("username") ?: doc.getString("name") ?: fallback
                     Log.d("HomeClient", "Loaded user name for uid=$uid -> $name")
                     // Update the splash text to real name if still visible
-                    if (binding.splashOverlay.visibility == View.VISIBLE) {
+                    if (binding.splashOverlay.isVisible) {
                         binding.tvSplash.text = getString(R.string.hello_name, name)
                         // cancel the previous hide and schedule a short delay so the user sees the real name
                         hideRunnable?.let {
@@ -100,7 +101,7 @@ class HomeClient : AppCompatActivity() {
             Ariketa(izena = "Plank", reps = 30, sets = 3)
         )
 
-        val workout: Workout = Workout(
+        val workout = Workout(
             id = "0Q94scUmahhEyKC6OutN",
             title = "Full Body Beginner",
             description = "A beginner-friendly full body workout.",
@@ -115,6 +116,12 @@ class HomeClient : AppCompatActivity() {
         //addWorkoutWithExcercises(workout)
         //editWorkout(workout)
         //deleteWorkout(workout.id)
+        showUserHistoric { historicList ->
+            Log.d("HomeClient", "User historic loaded: ${historicList.size} entries")
+            for (entry in historicList) {
+                Log.d("HomeClient", "Historic entry: $entry")
+            }
+        }
     }
 
     override fun onDestroy() {
@@ -126,26 +133,38 @@ class HomeClient : AppCompatActivity() {
     private fun showWorkouts() {
         // Get user lvl to filter workouts
         val uid = FirebaseSingleton.auth.currentUser?.uid ?: return
-        // FirebaseSingleton.db.collection("users").document(uid).get()
         val db = FirebaseSingleton.db
 
-        val workoutsMap = mutableMapOf<String, Workout>()
-        db.collection("workouts")
-            .get()
-            .addOnSuccessListener { result ->
-                for (document in result) {
-                    val workout = document.toObject(Workout::class.java)
-                    // guardar el id del documento en el objeto para futuras actualizaciones
-                    workout.id = document.id
-                    workoutsMap[document.id] = workout
-                   Log.d("HomeClient", "Workout loaded: ${document.id} ->) $workout")
-                }
-            Log.d("HomeClient", "Workout size = ${workoutsMap.size} ")
+        // Primero obtenemos el nivel del usuario
+        db.collection("users").document(uid).get()
+            .addOnSuccessListener { userDoc ->
+                val userLevel = userDoc.getLong("level")?.toInt() ?: 1 // nivel por defecto 1
+
+                val workoutsMap = mutableMapOf<String, Workout>()
+                db.collection("workouts")
+                    .get()
+                    .addOnSuccessListener { result ->
+                        for (document in result) {
+                            val workout = document.toObject(Workout::class.java)
+                            workout.id = document.id
+
+                            // Filtrar por nivel: mostrar workouts del mismo nivel o menor
+                            if (workout.level <= userLevel) {
+                                workoutsMap[document.id] = workout
+                                Log.d("HomeClient", "Workout loaded: ${document.id} -> $workout")
+                            }
+                        }
+                        Log.d("HomeClient", "Filtered workouts size = ${workoutsMap.size} for user level $userLevel")
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.w("HomeClient", "Error getting workouts: ", exception)
+                    }
             }
             .addOnFailureListener { exception ->
-                Log.w("HomeClient", "Error getting workouts: ", exception)
+                Log.w("HomeClient", "Error getting user level: ", exception)
             }
     }
+
 
 
     private fun addWorkoutWithExcercises(workout: Workout) {
@@ -216,5 +235,81 @@ class HomeClient : AppCompatActivity() {
                 Log.w("HomeClient", "Error eliminando workout id=$workoutId", e)
             }
     }
+
+    private fun showUserHistoric(onComplete: (List<Historic>) -> Unit = {}) {
+        val uid = FirebaseSingleton.auth.currentUser?.uid ?: return
+        val db = FirebaseSingleton.db
+
+        val historyList = mutableListOf<Historic>()
+
+        // Order by the string `date` field (newest first). `date` is stored as String per requirement.
+        db.collection("users").document(uid).collection("historic")
+            .orderBy("date", com.google.firebase.firestore.Query.Direction.DESCENDING)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                if (querySnapshot.isEmpty) {
+                    Log.d("HomeClient", "No hay histórico para el usuario")
+                    onComplete(historyList)
+                    return@addOnSuccessListener
+                }
+
+                var pending = querySnapshot.size()
+
+                for (doc in querySnapshot) {
+                    val id = doc.id
+                    val workoutId = doc.getString("workoutId") ?: ""
+                    val date = doc.getString("date") ?: ""
+                    val totalTime = doc.getLong("totalTime")?.toInt() ?: 0
+                    val totalReps = doc.getLong("totalReps")?.toInt() ?: 0
+                    val completed = doc.getBoolean("completed") ?: false
+
+                    val history = Historic(
+                        id = id,
+                        workoutId = workoutId,
+                        workoutTitle = "",
+                        date = date,
+                        totalTime = totalTime,
+                        totalReps = totalReps,
+                        completed = completed
+                    )
+
+                    if (workoutId.isBlank()) {
+                        history.workoutTitle = "Workout desconocido"
+                        historyList.add(history)
+                        pending--
+                        if (pending == 0) {
+                            Log.d("HomeClient", "Total histórico cargado: ${historyList.size}")
+                            onComplete(historyList)
+                        }
+                        continue
+                    }
+
+                    db.collection("workouts").document(workoutId).get()
+                        .addOnSuccessListener { workoutDoc ->
+                            val title = workoutDoc.getString("name") ?: "Workout desconocido"
+                            history.workoutTitle = title
+                            historyList.add(history)
+                        }
+                        .addOnFailureListener { e ->
+                            Log.w("HomeClient", "Error obteniendo workout title para histórico", e)
+                            history.workoutTitle = "Workout desconocido"
+                            historyList.add(history)
+                        }
+                        .addOnCompleteListener {
+                            pending--
+                            if (pending == 0) {
+                                Log.d("HomeClient", "Total histórico cargado: ${historyList.size}")
+                                onComplete(historyList)
+                                // TODO: actualizar UI con historyList
+                            }
+                        }
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.w("HomeClient", "Error obteniendo histórico del usuario: ", exception)
+                onComplete(historyList)
+            }
+    }
+
 
 }

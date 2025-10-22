@@ -12,13 +12,12 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.erronka1.db.FirebaseSingleton
 import com.example.erronka1.databinding.LoginBinding
+import kotlin.text.get
+import kotlin.toString
 
 class Login : AppCompatActivity() {
 
     private lateinit var binding: LoginBinding
-
-    private var language = listOf("Español", "Euskara", "English")
-    private var selectedLanguageChoice: String = language[0]
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,35 +30,11 @@ class Login : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-       // initSpinner()
+
         initListeners()
 
 
     }
-
-   /* fun initSpinner() {
-        val spinner = findViewById<Spinner>(R.id.spLanguages)
-
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, language)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-
-        spinner.adapter = adapter
-        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                // Guardar la selección para usarla en la app si hace falta
-                selectedLanguageChoice = language[position]
-                // Opcional: mostrar breve confirmación
-                Toast.makeText(this@Login, "Idioma: $selectedLanguageChoice", Toast.LENGTH_SHORT).show()
-            }
-
-            override fun onNothingSelected(p0: AdapterView<*>?) {}
-        }
-    }*/
 
     private fun initListeners() {
         binding.btnLogin.setOnClickListener {
@@ -69,9 +44,32 @@ class Login : AppCompatActivity() {
             FirebaseSingleton.auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        val intent = Intent(this, HomeClient::class.java)
-                        startActivity(intent)
-                        Toast.makeText(this, "Ongi etorri!", Toast.LENGTH_LONG).show()
+                        // Obtener el UID del usuario autenticado
+                        val uid = FirebaseSingleton.auth.currentUser?.uid ?: return@addOnCompleteListener
+
+                        // Consultar Firestore para obtener los datos del usuario
+                        FirebaseSingleton.db.collection("users").document(uid).get()
+                            .addOnSuccessListener { document ->
+                                if (document.exists()) {
+                                    val isTrainer = document.getBoolean("trainer") ?: false
+
+                                    if (isTrainer) {
+                                        val intent = Intent(this, HomeTrainer::class.java)
+                                        startActivity(intent)
+                                        finish()
+                                    } else {
+                                        val intent = Intent(this, HomeClient::class.java)
+                                        startActivity(intent)
+                                        finish()
+                                    }
+                                    Toast.makeText(this, "Ongi etorri!", Toast.LENGTH_LONG).show()
+                                } else {
+                                    Toast.makeText(this, "Error: Usuario no encontrado en la base de datos", Toast.LENGTH_LONG).show()
+                                }
+                            }
+                            .addOnFailureListener { exception ->
+                                Toast.makeText(this, "Error obteniendo datos del usuario: ${exception.message}", Toast.LENGTH_LONG).show()
+                            }
                     } else {
                         task.exception?.message?.let { message ->
                             Toast.makeText(

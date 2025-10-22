@@ -28,6 +28,9 @@
         <activity
             android:name=".Login"
             android:exported="false" />
+        <activity
+            android:name=".HomeTrainer"
+            android:exported="false" />
     </application>
 
 </manifest>

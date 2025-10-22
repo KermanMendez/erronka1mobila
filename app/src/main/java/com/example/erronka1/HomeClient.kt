@@ -40,9 +40,6 @@ class HomeClient : AppCompatActivity() {
         binding.splashOverlay.visibility = View.VISIBLE
         binding.splashOverlay.alpha = 1f
 
-        // Ensure main welcome is empty (we don't want "Hola <name>" on the main screen)
-        binding.tvWelcome.text = ""
-
         // Simple entrance animation for the splash text
         binding.tvSplash.alpha = 0f
         binding.tvSplash.scaleX = 0.95f

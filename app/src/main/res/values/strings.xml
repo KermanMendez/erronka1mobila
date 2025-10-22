@@ -41,5 +41,9 @@
     <string name="showPassword">Erakutsi</string>
     <string name="rememberMe">Gorde saioa</string>
 
-
+    <string name="create_workout">Workout Berria</string>
+    <string name="edit_workout">Editatu Workout</string>
+    <string name="delete_workout">Ezabatu workout</string>
+    <string name="order_arrow">Ordenatu</string>
+    <string name="profile">Perfila</string>
 </resources>

@@ -75,7 +75,7 @@
                 <EditText
                     android:id="@+id/username"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="48dp"
                     android:inputType="text"
                     android:autofillHints="UserName"
                     android:layout_marginEnd="10dp"/>
@@ -95,7 +95,7 @@
                 <EditText
                     android:id="@+id/password"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="48dp"
                     android:inputType="textPassword"
                     android:autofillHints="UserPassword"
                     android:layout_marginEnd="10dp"/>
@@ -112,12 +112,7 @@
                     android:id="@+id/showPassword"
                     android:text="@string/showPassword"
                     android:layout_marginStart="10dp"/>
-                <CheckBox
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:id="@+id/rememberMe"
-                    android:text="@string/rememberMe"
-                    android:layout_marginStart="10dp"/>
+
             </LinearLayout>
 
             <LinearLayout

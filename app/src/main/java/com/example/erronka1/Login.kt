@@ -12,6 +12,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.erronka1.db.FirebaseSingleton
 import com.example.erronka1.databinding.LoginBinding
+import com.google.firebase.auth.auth
 import kotlin.text.get
 import kotlin.toString
 
@@ -30,14 +31,31 @@ class Login : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
+        checkCurrentUserAndRedirect()
         initListeners()
 
 
     }
 
+
+    private fun checkCurrentUserAndRedirect() {
+        val currentUser = FirebaseSingleton.auth.currentUser
+        if (currentUser != null) {
+            FirebaseSingleton.db.collection("users").document(currentUser.uid).get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        val isTrainer = document.getBoolean("trainer") ?: false
+                        val intent = if (isTrainer) Intent(this, HomeTrainer::class.java)
+                        else Intent(this, HomeClient::class.java)
+                        startActivity(intent)
+                        finish()
+                    }
+                }
+        }
+    }
     private fun initListeners() {
         binding.btnLogin.setOnClickListener {
+
             val email = binding.username.text.toString()
             val password = binding.password.text.toString()
 
@@ -80,7 +98,8 @@ class Login : AppCompatActivity() {
                         }
                     }
                 }
-        }
+            }
+
 
         binding.btnBack.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)

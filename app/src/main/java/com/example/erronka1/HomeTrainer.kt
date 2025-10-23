@@ -29,7 +29,7 @@ class HomeTrainer : AppCompatActivity() {
         }
         var up = false
         binding.ivBacktoLogin.setOnClickListener {
-            val intent = android.content.Intent(this, Login::class.java)
+            val intent = android.content.Intent(this, MainActivity::class.java)
             startActivity(intent)
             finish()
         }

@@ -38,6 +38,9 @@ class Login : AppCompatActivity() {
     }
 
 
+    private fun logOutCurrentUser() {
+        FirebaseSingleton.auth.signOut()
+    }
     private fun checkCurrentUserAndRedirect() {
         val currentUser = FirebaseSingleton.auth.currentUser
         if (currentUser != null) {

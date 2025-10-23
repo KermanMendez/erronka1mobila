@@ -7,7 +7,7 @@ data class User(
     var surname2: String = "",
     var birthdate: String = "",
     var isTrainer: Boolean = false,
-    var level: Int = 0,
+    var level: Int = 1,
     // Need to se if it's necessary to initialize workouts to empty list or to be 2 separated objets
-    var workouts: List<Workout> = emptyList()
+
 )

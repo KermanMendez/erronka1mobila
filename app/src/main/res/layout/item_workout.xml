@@ -61,6 +61,14 @@
                 android:text="@string/done_exercises_porcent"
                 android:textStyle="bold"
                 android:background="@drawable/cell_border"/>
+            <TextView
+                android:id="@+id/tvWorkoutVideo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="@string/workout_video"
+                android:textStyle="bold"
+                android:background="@drawable/cell_border"/>
         </TableRow>
     </TableLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

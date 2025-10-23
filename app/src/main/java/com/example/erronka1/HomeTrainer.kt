@@ -1,21 +1,32 @@
 package com.example.erronka1
 
+import android.app.Dialog
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.erronka1.databinding.ActivityHomeTrainerBinding
+import com.example.erronka1.databinding.ActivityNewWorkoutBinding
+import com.example.erronka1.databinding.ActivityUserProfileBinding
 import com.example.erronka1.db.FirebaseSingleton
+import com.example.erronka1.model.Ariketa
 import com.example.erronka1.model.Workout
+import com.example.erronka1.rvWorkout.WorkoutAdapter
 
 class HomeTrainer : AppCompatActivity() {
 
     private lateinit var binding : ActivityHomeTrainerBinding
     private var hideRunnable: Runnable? = null
+    private lateinit var workoutAdapter: WorkoutAdapter
+    private var language = listOf("Español", "Euskara", "English")
+    private var selectedLanguageChoice: String = language[0]
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,7 +40,7 @@ class HomeTrainer : AppCompatActivity() {
         }
         var up = false
         binding.ivBacktoLogin.setOnClickListener {
-            val intent = android.content.Intent(this, Login::class.java)
+            val intent = android.content.Intent(this, MainActivity::class.java)
             startActivity(intent)
             finish()
         }
@@ -43,8 +54,9 @@ class HomeTrainer : AppCompatActivity() {
             }
         }
         binding.ivProfile.setOnClickListener {
-            showAllWorkouts()
+            showUserProfileDialog()
         }
+
 
         // Show a centered fullscreen splash (tvSplash) while we prepare the screen
         val fallback = FirebaseSingleton.auth.currentUser?.displayName
@@ -101,6 +113,35 @@ class HomeTrainer : AppCompatActivity() {
                 }
         }
 
+        val gehitu: List<Ariketa> = listOf(
+            Ariketa(izena = "Jumping Jacks", reps = 20, sets = 3),
+            Ariketa(izena = "Push-ups", reps = 10, sets = 3),
+            Ariketa(izena = "Bodyweight Squats", reps = 15, sets = 3),
+            Ariketa(izena = "Plank", reps = 30, sets = 3)
+        )
+
+        val workout: Workout = Workout(
+            title = "Full Body Beginner",
+            description = "A",
+            level = 1,
+            ariketak = gehitu
+        )
+        val workout2: Workout = Workout(
+            title = "Egunon",
+            description = "Oso txarto",
+            level = 2,
+            ariketak = gehitu
+        )
+        val workoutList: MutableList<Workout> = mutableListOf(workout, workout2)
+
+
+        workoutAdapter = WorkoutAdapter(workoutList) {}
+        binding.rvTableWorkouts.layoutManager = LinearLayoutManager(this)
+        binding.rvTableWorkouts.adapter = workoutAdapter
+
+        binding.btnCreateWorkout.setOnClickListener {
+            showCreateWorkoutDialog(workoutList)
+        }
     }
 
     override fun onDestroy() {
@@ -198,5 +239,55 @@ class HomeTrainer : AppCompatActivity() {
             .addOnFailureListener { e ->
                 Log.w("HomeClient", "Error eliminando workout id=$workoutId", e)
             }
+    }
+
+    private fun showUserProfileDialog() {
+
+        val userBinding = ActivityUserProfileBinding.inflate(layoutInflater)
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, language)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        userBinding.spLanguages.adapter = adapter
+        userBinding.spLanguages.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedLanguageChoice = language[position]
+            }
+            override fun onNothingSelected(p0: AdapterView<*>?) {}
+        }
+
+        val dialog = Dialog(this)
+        dialog.setContentView(userBinding.root)
+        dialog.show()
+    }
+
+    private fun showCreateWorkoutDialog(workoutList: MutableList<Workout>) {
+
+        val newWorkoutBinding = ActivityNewWorkoutBinding.inflate(layoutInflater)
+
+        newWorkoutBinding.npLevel.minValue = 1
+        newWorkoutBinding.npLevel.maxValue = 5
+
+        val dialog = Dialog(this)
+        dialog.setContentView(newWorkoutBinding.root)
+        dialog.show()
+
+        newWorkoutBinding.btnCancel.setOnClickListener {
+            dialog.cancel()
+        }
+        newWorkoutBinding.btnConfirm.setOnClickListener {
+            val workout: Workout = Workout(
+                "",
+                newWorkoutBinding.etTitle.text.toString(),
+                newWorkoutBinding.etDescription.text.toString(),
+                newWorkoutBinding.npLevel.value,
+                newWorkoutBinding.etVideo.text.toString(),
+                listOf()
+            )
+            addWorkoutWithExcercises(workout)
+            workoutList.add(workout)
+            Log.i("",workoutList.toString())
+
+            dialog.cancel()
+        }
     }
 }

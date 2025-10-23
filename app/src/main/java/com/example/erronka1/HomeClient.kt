@@ -1,24 +1,33 @@
 package com.example.erronka1
 
+import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.erronka1.db.FirebaseSingleton
 import com.example.erronka1.model.Ariketa
 import com.example.erronka1.databinding.ActivityHomeClientBinding
+import com.example.erronka1.databinding.ActivityUserProfileBinding
 import com.example.erronka1.model.Workout
 import com.example.erronka1.model.Historic
+import com.example.erronka1.rvWorkout.WorkoutAdapter
 
 class HomeClient : AppCompatActivity() {
 
     private lateinit var binding: ActivityHomeClientBinding
     private var hideRunnable: Runnable? = null
+    private lateinit var workoutAdapter: WorkoutAdapter
+    private var language = listOf("Español", "Euskara", "English")
+    private var selectedLanguageChoice: String = language[0]
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,6 +99,10 @@ class HomeClient : AppCompatActivity() {
             startActivity(intent)
         }
 
+        binding.ivProfile.setOnClickListener {
+            showUserProfileDialog()
+        }
+
         showWorkouts()
         val gehitu: List<Ariketa> = listOf(
             Ariketa(izena = "Jumping Jacks", reps = 20, sets = 3),
@@ -98,13 +111,24 @@ class HomeClient : AppCompatActivity() {
             Ariketa(izena = "Plank", reps = 30, sets = 3)
         )
 
-        val workout = Workout(
-            id = "0Q94scUmahhEyKC6OutN",
+        val workout: Workout = Workout(
             title = "Full Body Beginner",
-            description = "A beginner-friendly full body workout.",
+            description = "A",
             level = 1,
             ariketak = gehitu
         )
+        val workout2: Workout = Workout(
+            title = "Egunon",
+            description = "Oso txarto",
+            level = 2,
+            ariketak = gehitu
+        )
+        val workoutList: List<Workout> = listOf(workout, workout2)
+
+
+        workoutAdapter = WorkoutAdapter(workoutList) {}
+        binding.rvTableWorkouts.layoutManager = LinearLayoutManager(this)
+        binding.rvTableWorkouts.adapter = workoutAdapter
 
         workout.title = "Cambiado desde app"
 
@@ -235,6 +259,25 @@ class HomeClient : AppCompatActivity() {
                 Log.w("HomeClient", "Error obteniendo histórico del usuario: ", exception)
                 onComplete(historyList)
             }
+    }
+
+    private fun showUserProfileDialog() {
+
+        val userBinding = ActivityUserProfileBinding.inflate(layoutInflater)
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, language)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        userBinding.spLanguages.adapter = adapter
+        userBinding.spLanguages.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedLanguageChoice = language[position]
+            }
+            override fun onNothingSelected(p0: AdapterView<*>?) {}
+        }
+
+        val dialog = Dialog(this)
+        dialog.setContentView(userBinding.root)
+        dialog.show()
     }
 
 

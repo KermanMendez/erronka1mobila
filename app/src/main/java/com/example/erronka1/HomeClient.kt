@@ -14,7 +14,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.erronka1.db.FirebaseSingleton
-import com.example.erronka1.model.Ariketa
 import com.example.erronka1.databinding.ActivityHomeClientBinding
 import com.example.erronka1.databinding.ActivityUserProfileBinding
 import com.example.erronka1.model.Workout
@@ -25,9 +24,14 @@ class HomeClient : AppCompatActivity() {
 
     private lateinit var binding: ActivityHomeClientBinding
     private var hideRunnable: Runnable? = null
+<<<<<<< HEAD
     private lateinit var workoutAdapter: WorkoutAdapter
     private var language = listOf("Español", "Euskara", "English")
     private var selectedLanguageChoice: String = language[0]
+=======
+    private var workoutsList = mutableListOf<Workout>()
+    private lateinit var workoutAdapter: WorkoutAdapter
+>>>>>>> 44cfb854dbd31d19b35b1d60e8666c5ad0c18b1a
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,6 +53,12 @@ class HomeClient : AppCompatActivity() {
         binding.splashOverlay.visibility = View.VISIBLE
         binding.splashOverlay.alpha = 1f
 
+        // Hide header elements initially (they will be shown after splash)
+        binding.ivBacktoLogin.visibility = View.GONE
+        binding.tvTitle.visibility = View.GONE
+        binding.rvWorkouts.visibility = View.GONE
+        binding.tvNoWorkouts.visibility = View.GONE
+
         // Simple entrance animation for the splash text
         binding.tvSplash.alpha = 0f
         binding.tvSplash.scaleX = 0.95f
@@ -64,6 +74,12 @@ class HomeClient : AppCompatActivity() {
         hideRunnable = Runnable {
             binding.splashOverlay.animate().alpha(0f).setDuration(350).withEndAction {
                 binding.splashOverlay.visibility = View.GONE
+                // Show header elements after splash is hidden
+                binding.ivBacktoLogin.visibility = View.VISIBLE
+                binding.tvTitle.visibility = View.VISIBLE
+                // Setup RecyclerView and load workouts AFTER splash is hidden
+                setupRecyclerView()
+                showWorkouts()
             }.start()
         }
 
@@ -95,10 +111,11 @@ class HomeClient : AppCompatActivity() {
         }
 
         binding.ivBacktoLogin.setOnClickListener {
-            val intent = Intent(this, Login::class.java)
+            val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         }
 
+<<<<<<< HEAD
         binding.ivProfile.setOnClickListener {
             showUserProfileDialog()
         }
@@ -137,6 +154,9 @@ class HomeClient : AppCompatActivity() {
         //addWorkoutWithExcercises(workout)
         //editWorkout(workout)
         //deleteWorkout(workout.id)
+=======
+
+>>>>>>> 44cfb854dbd31d19b35b1d60e8666c5ad0c18b1a
         showUserHistoric { historicList ->
             Log.d("HomeClient", "User historic loaded: ${historicList.size} entries")
             for (entry in historicList) {
@@ -151,6 +171,20 @@ class HomeClient : AppCompatActivity() {
         super.onDestroy()
     }
 
+    private fun setupRecyclerView() {
+        workoutAdapter = WorkoutAdapter(workoutsList) { position ->
+            // Handle workout selection - you can add navigation to workout detail here
+            val selectedWorkout = workoutsList[position]
+            Log.d("HomeClient", "Workout selected: ${selectedWorkout.title}")
+            // TODO: Navigate to workout detail or start workout activity
+        }
+
+        binding.rvWorkouts.apply {
+            layoutManager = LinearLayoutManager(this@HomeClient)
+            adapter = workoutAdapter
+        }
+    }
+
     private fun showWorkouts() {
         // Get user lvl to filter workouts
         val uid = FirebaseSingleton.auth.currentUser?.uid ?: return
@@ -161,28 +195,44 @@ class HomeClient : AppCompatActivity() {
             .addOnSuccessListener { userDoc ->
                 val userLevel = userDoc.getLong("level")?.toInt() ?: 1 // nivel por defecto 1
 
-                val workoutsMap = mutableMapOf<String, Workout>()
                 db.collection("workouts")
                     .get()
                     .addOnSuccessListener { result ->
+                        workoutsList.clear()
+
                         for (document in result) {
                             val workout = document.toObject(Workout::class.java)
                             workout.id = document.id
 
                             // Filtrar por nivel: mostrar workouts del mismo nivel o menor
                             if (workout.level <= userLevel) {
-                                workoutsMap[document.id] = workout
+                                workoutsList.add(workout)
                                 Log.d("HomeClient", "Workout loaded: ${document.id} -> $workout")
                             }
                         }
-                        Log.d("HomeClient", "Filtered workouts size = ${workoutsMap.size} for user level $userLevel")
+
+                        // Update UI
+                        if (workoutsList.isEmpty()) {
+                            binding.rvWorkouts.visibility = View.GONE
+                            binding.tvNoWorkouts.visibility = View.VISIBLE
+                        } else {
+                            binding.rvWorkouts.visibility = View.VISIBLE
+                            binding.tvNoWorkouts.visibility = View.GONE
+                            workoutAdapter.notifyItemRangeInserted(0, workoutsList.size)
+                        }
+
+                        Log.d("HomeClient", "Filtered workouts size = ${workoutsList.size} for user level $userLevel")
                     }
                     .addOnFailureListener { exception ->
                         Log.w("HomeClient", "Error getting workouts: ", exception)
+                        binding.rvWorkouts.visibility = View.GONE
+                        binding.tvNoWorkouts.visibility = View.VISIBLE
                     }
             }
             .addOnFailureListener { exception ->
                 Log.w("HomeClient", "Error getting user level: ", exception)
+                binding.rvWorkouts.visibility = View.GONE
+                binding.tvNoWorkouts.visibility = View.VISIBLE
             }
     }
 

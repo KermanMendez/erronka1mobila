@@ -25,9 +25,11 @@ class HomeTrainer : AppCompatActivity() {
     private lateinit var binding : ActivityHomeTrainerBinding
     private var hideRunnable: Runnable? = null
     private lateinit var workoutAdapter: WorkoutAdapter
+    private var selectedWorkout: Workout? = null
     private var language = listOf("Euskara", "Español", "English")
     private var selectedLanguageChoice: String = language[0]
-    private lateinit var selectedWorkout: Workout
+    private var up: Boolean = false
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,7 +41,7 @@ class HomeTrainer : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             return@setOnApplyWindowInsetsListener insets
         }
-        var up = false
+
         binding.ivBacktoLogin.setOnClickListener {
             val intent = android.content.Intent(this, MainActivity::class.java)
             startActivity(intent)
@@ -119,7 +121,7 @@ class HomeTrainer : AppCompatActivity() {
                 }
         }
 
-        val gehitu: List<Ariketa> = listOf(
+        /*val gehitu: List<Ariketa> = listOf(
             Ariketa(izena = "Jumping Jacks", reps = 20, sets = 3),
             Ariketa(izena = "Push-ups", reps = 10, sets = 3),
             Ariketa(izena = "Bodyweight Squats", reps = 15, sets = 3),
@@ -138,7 +140,7 @@ class HomeTrainer : AppCompatActivity() {
             level = 2,
             ariketak = gehitu
         )
-        //val workoutList: MutableList<Workout> = loadAllWorkouts()
+        val workoutList: MutableList<Workout> = loadAllWorkouts()*/
 
 
         loadAllWorkouts { workoutList ->
@@ -153,9 +155,18 @@ class HomeTrainer : AppCompatActivity() {
                 workoutAdapter.notifyDataSetChanged()
             }
             binding.btnDeleteWorkout.setOnClickListener {
-                deleteWorkout(selectedWorkout.id)
-                workoutList.removeAt(workoutList.indexOf(selectedWorkout))
-                workoutAdapter.notifyDataSetChanged()
+                val workout = selectedWorkout
+                if (workout != null){
+                    deleteWorkout(workout.id)
+                    val index = workoutList.indexOf(workout)
+                    if (index != -1) {
+                        workoutList.removeAt(index)
+                        workoutAdapter.notifyItemRemoved(index)
+                    }
+                    selectedWorkout = null
+                } else {
+                    Log.w("HomeTrainer", "No workout seleccionado para eliminar")
+                }
             }
         }
     }

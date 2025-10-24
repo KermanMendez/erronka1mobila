@@ -27,6 +27,7 @@ class HomeClient : AppCompatActivity() {
     private var hideRunnable: Runnable? = null
 
     private lateinit var workoutAdapter: WorkoutAdapter
+    private lateinit var selectedWorkout: Workout
     private var language = listOf("Euskara", "Español", "English")
     private var selectedLanguageChoice: String = language[0]
 
@@ -55,9 +56,9 @@ class HomeClient : AppCompatActivity() {
 
         // Hide header elements initially (they will be shown after splash)
         binding.ivBacktoLogin.visibility = View.GONE
-        binding.tvTitle.visibility = View.GONE
+        //binding.tvTitle.visibility = View.GONE
         binding.rvWorkouts.visibility = View.GONE
-        binding.tvNoWorkouts.visibility = View.GONE
+        //binding.tvNoWorkouts.visibility = View.GONE
 
         // Simple entrance animation for the splash text
         binding.tvSplash.alpha = 0f
@@ -76,10 +77,10 @@ class HomeClient : AppCompatActivity() {
                 binding.splashOverlay.visibility = View.GONE
                 // Show header elements after splash is hidden
                 binding.ivBacktoLogin.visibility = View.VISIBLE
-                binding.tvTitle.visibility = View.VISIBLE
+                //binding.tvTitle.visibility = View.VISIBLE
                 // Setup RecyclerView and load workouts AFTER splash is hidden
-                setupRecyclerView()
-                showWorkouts()
+                //setupRecyclerView()
+                //showWorkouts()
             }.start()
         }
 
@@ -99,16 +100,16 @@ class HomeClient : AppCompatActivity() {
                             binding.splashOverlay.removeCallbacks(it)
                             binding.splashOverlay.postDelayed(it, hideDelayAfterNameMs)
                         }
-                     }
-                 }
+                    }
+                }
                 .addOnFailureListener { e ->
                     Log.e("HomeClient", "Failed to load user doc uid=$uid: ${e.message}")
                     // let the original timeout hide the splash
                 }
-        } ?: run {
+        } /*?: run {
             Log.d("HomeClient", "No auth UID available; using fallback for welcome")
             // Keep the splash showing the fallback; the hideRunnable will remove it after timeout
-        }
+        }*/
 
         binding.ivBacktoLogin.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
@@ -116,12 +117,13 @@ class HomeClient : AppCompatActivity() {
         }
 
 
+
         binding.ivSettings.setOnClickListener {
             showSettingsDialog()
         }
 
-        showWorkouts()
-        val gehitu: List<Ariketa> = listOf(
+
+        /*val gehitu: List<Ariketa> = listOf(
             Ariketa(izena = "Jumping Jacks", reps = 20, sets = 3),
             Ariketa(izena = "Push-ups", reps = 10, sets = 3),
             Ariketa(izena = "Bodyweight Squats", reps = 15, sets = 3),
@@ -140,27 +142,26 @@ class HomeClient : AppCompatActivity() {
             level = 2,
             ariketak = gehitu
         )
-        val workoutList: List<Workout> = listOf(workout, workout2)
+        val workoutList: List<Workout> = listOf(workout, workout2)*/
+
+        loadAllWorkouts { workoutList ->
+            workoutAdapter = WorkoutAdapter(workoutList) { selectedPosition ->
+                selectedWorkout = workoutList[selectedPosition]
+            }
+            binding.rvWorkouts.layoutManager = LinearLayoutManager(this)
+            binding.rvWorkouts.adapter = workoutAdapter
+        }
 
 
-        workoutAdapter = WorkoutAdapter(workoutList) {}
-        binding.rvWorkouts.layoutManager = LinearLayoutManager(this)
-        binding.rvWorkouts.adapter = workoutAdapter
-
-        workout.title = "Cambiado desde app"
 
 
-
-        //addWorkoutWithExcercises(workout)
-        //editWorkout(workout)
-        //deleteWorkout(workout.id)
-
-        showUserHistoric { historicList ->
+        /*showUserHistoric { historicList ->
             Log.d("HomeClient", "User historic loaded: ${historicList.size} entries")
             for (entry in historicList) {
                 Log.d("HomeClient", "Historic entry: $entry")
             }
-        }
+        }*/
+
     }
 
     override fun onDestroy() {
@@ -183,7 +184,7 @@ class HomeClient : AppCompatActivity() {
         }
     }
 
-    private fun showWorkouts() {
+    /*private fun showWorkouts() {
         // Get user lvl to filter workouts
         val uid = FirebaseSingleton.auth.currentUser?.uid ?: return
         val db = FirebaseSingleton.db
@@ -211,10 +212,10 @@ class HomeClient : AppCompatActivity() {
 
                         // Update UI
                         if (workoutsList.isEmpty()) {
-                            binding.rvWorkouts.visibility = View.GONE
+                            binding.rvTableWorkouts.visibility = View.GONE
                             binding.tvNoWorkouts.visibility = View.VISIBLE
                         } else {
-                            binding.rvWorkouts.visibility = View.VISIBLE
+                            binding.rvTableWorkouts.visibility = View.VISIBLE
                             binding.tvNoWorkouts.visibility = View.GONE
                             workoutAdapter.notifyItemRangeInserted(0, workoutsList.size)
                         }
@@ -231,6 +232,30 @@ class HomeClient : AppCompatActivity() {
                 Log.w("HomeClient", "Error getting user level: ", exception)
                 binding.rvWorkouts.visibility = View.GONE
                 binding.tvNoWorkouts.visibility = View.VISIBLE
+            }
+    }*/
+    private fun loadAllWorkouts(callback: (MutableList<Workout>) -> Unit) {
+        // Get user lvl to filter workouts
+        val db = FirebaseSingleton.db
+
+        val workoutList: MutableList<Workout> = mutableListOf()
+
+        val workoutsMap = mutableMapOf<String, Workout>()
+        db.collection("workouts")
+            .get()
+            .addOnSuccessListener { result ->
+                for (document in result) {
+                    val workout = document.toObject(Workout::class.java)
+                    workoutsMap[document.id] = workout
+                    workoutList.add(workout)
+                    Log.d("HomeTrainer", "Workout loaded: ${document.id} ->) $workout")
+                }
+                Log.d("HomeTrainer", "Workout size = ${workoutsMap.size} ")
+                callback(workoutList)
+            }
+            .addOnFailureListener { exception ->
+                Log.w("HomeTrainer", "Error getting workouts: ", exception)
+                callback(mutableListOf())
             }
     }
 

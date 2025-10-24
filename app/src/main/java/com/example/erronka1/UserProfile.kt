@@ -39,7 +39,7 @@ class UserProfile : AppCompatActivity() {
                 .get()
                 .addOnSuccessListener { document ->
                     if (document.exists()) {
-                        val currentUser = document.toObject(User::class.java)
+                        currentUser = document.toObject(User::class.java)
                         currentUser?.let { user ->
                             binding.editTextName.setText(user.name ?: "")
                             binding.editTextSurname.setText(user.surname ?: "")
@@ -55,6 +55,7 @@ class UserProfile : AppCompatActivity() {
     }
 
     private fun updateUserProfile() {
+        Log.d("UserProfile", "Updating user:")
         currentUser?.let { user ->
 
             user.name = binding.editTextName.text.toString().trim()
@@ -62,7 +63,7 @@ class UserProfile : AppCompatActivity() {
             user.surname2 = binding.editTextSurname2.text.toString().trim()
             user.birthdate = binding.editTextBirthdate.text.toString().trim()
 
-            Log.d("UserProfile", "Updating user: $user")
+
 
             val authUser = FirebaseSingleton.auth.currentUser
             if (authUser != null) {

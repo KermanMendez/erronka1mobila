@@ -7,117 +7,105 @@
     android:layout_height="match_parent"
     tools:context=".HomeClient">
 
-    <!-- Splash overlay that covers the entire screen -->
+    <ImageView
+        android:id="@+id/ivBacktoLogin"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:padding="10dp"
+        android:layout_margin="10dp"
+        android:background="@drawable/rounded_borders"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/ic_menu_revert"
+        android:contentDescription="@string/back"/>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/ivBacktoLogin"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="10dp"
+        android:gravity="end">
+        <LinearLayout
+            android:id="@+id/llOrder"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:background="@drawable/rounded_borders"
+            android:gravity="center"
+            tools:ignore="UselessParent">
+            <ImageView
+                android:id="@+id/ivUpDownArrow"
+                android:layout_marginStart="10dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:background="@drawable/black_border"
+                android:src="@drawable/outline_keyboard_arrow_down_24"
+                android:contentDescription="@string/order_arrow"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/order_arrow"
+                android:layout_margin="10dp"
+                android:textColor="@color/black"
+                android:textStyle="bold"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp">
+            <ImageView
+                android:id="@+id/ivProfile"
+                android:layout_marginStart="10dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:background="@drawable/rounded_borders"
+                android:src="@drawable/outline_person_24"
+                android:contentDescription="@string/profile"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp">
+            <ImageView
+                android:id="@+id/ivSettings"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:background="@drawable/rounded_borders"
+                android:src="@drawable/outline_settings_24"
+                android:contentDescription="@string/profile"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvWorkouts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/ivBacktoLogin"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
     <FrameLayout
         android:id="@+id/splashOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#FFFFFF"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:background="@color/white"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <TextView
             android:id="@+id/tvSplash"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Kaixo!"
-            android:textColor="#000000"
-            android:textSize="32sp"
+            android:text="@string/hello"
+            android:textSize="28sp"
             android:textStyle="bold" />
 
     </FrameLayout>
-
-    <!-- Back button -->
-    <ImageView
-        android:id="@+id/ivBacktoLogin"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_margin="16dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:clickable="true"
-        android:focusable="true"
-        android:padding="8dp"
-        android:src="@android:drawable/ic_menu_revert"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <LinearLayout
-        android:id="@+id/llProfile"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_margin="6dp">
-        <ImageView
-            android:id="@+id/ivProfile"
-            android:layout_marginStart="10dp"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:background="@drawable/rounded_borders"
-            android:src="@drawable/outline_person_24"
-            android:contentDescription="@string/profile"/>
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toEndOf="@id/llProfile"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_margin="6dp">
-        <ImageView
-            android:id="@+id/ivSettings"
-            android:layout_marginStart="10dp"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:background="@drawable/rounded_borders"
-            android:src="@drawable/outline_settings_24"
-            android:contentDescription="@string/profile"/>
-    </LinearLayout>
-
-    <!-- Title -->
-    <TextView
-        android:id="@+id/tvTitle"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="16dp"
-        android:text="Entrenamientos disponibles"
-        android:textColor="#000000"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/ivBacktoLogin"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- RecyclerView for workouts -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvWorkouts"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_margin="16dp"
-        android:clipToPadding="false"
-        android:paddingBottom="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle"
-        tools:listitem="@layout/item_workout" />
-
-    <!-- Empty state message -->
-    <TextView
-        android:id="@+id/tvNoWorkouts"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="No hay entrenamientos disponibles para tu nivel"
-        android:textColor="#666666"
-        android:textSize="16sp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

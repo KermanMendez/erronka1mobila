@@ -27,7 +27,7 @@ class HomeClient : AppCompatActivity() {
     private var hideRunnable: Runnable? = null
 
     private lateinit var workoutAdapter: WorkoutAdapter
-    private var language = listOf("Español", "Euskara", "English")
+    private var language = listOf("Euskara", "Español", "English")
     private var selectedLanguageChoice: String = language[0]
 
     private var workoutsList = mutableListOf<Workout>()

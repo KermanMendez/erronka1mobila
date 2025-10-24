@@ -52,4 +52,7 @@
     <string name="confirm">Berretsi</string>
     <string name="cancel">Utzi</string>
 
+    <string name="profile_edit">Perfila editatu</string>
+    <string name="save_changes">Gorde aldaketak</string>
+
 </resources>

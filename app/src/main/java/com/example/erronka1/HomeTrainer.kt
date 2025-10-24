@@ -25,7 +25,7 @@ class HomeTrainer : AppCompatActivity() {
     private lateinit var binding : ActivityHomeTrainerBinding
     private var hideRunnable: Runnable? = null
     private lateinit var workoutAdapter: WorkoutAdapter
-    private var language = listOf("Español", "Euskara", "English")
+    private var language = listOf("Euskara", "Español", "English")
     private var selectedLanguageChoice: String = language[0]
     private lateinit var selectedWorkout: Workout
 
@@ -57,8 +57,10 @@ class HomeTrainer : AppCompatActivity() {
         binding.ivSettings.setOnClickListener {
             showUserSettingsDialog()
         }
-        binding.btnEditWorkout.setOnClickListener {
-
+        binding.ivProfile.setOnClickListener {
+            val intent = android.content.Intent(this, UserProfile::class.java)
+            startActivity(intent)
+            finish()
         }
 
 

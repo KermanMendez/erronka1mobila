@@ -64,6 +64,7 @@
                 android:contentDescription="@string/profile"/>
         </LinearLayout>
     </LinearLayout>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvTableWorkouts"
         android:layout_width="match_parent"

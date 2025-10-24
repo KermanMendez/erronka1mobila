@@ -27,6 +27,7 @@ class HomeTrainer : AppCompatActivity() {
     private lateinit var workoutAdapter: WorkoutAdapter
     private var language = listOf("Español", "Euskara", "English")
     private var selectedLanguageChoice: String = language[0]
+    private lateinit var selectedWorkout: Workout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -139,12 +140,20 @@ class HomeTrainer : AppCompatActivity() {
 
 
         loadAllWorkouts { workoutList ->
-            workoutAdapter = WorkoutAdapter(workoutList) {}
+            workoutAdapter = WorkoutAdapter(workoutList) { selectedPosition ->
+                selectedWorkout = workoutList[selectedPosition]
+            }
             binding.rvTableWorkouts.layoutManager = LinearLayoutManager(this)
             binding.rvTableWorkouts.adapter = workoutAdapter
 
             binding.btnCreateWorkout.setOnClickListener {
                 showCreateWorkoutDialog(workoutList)
+                workoutAdapter.notifyDataSetChanged()
+            }
+            binding.btnDeleteWorkout.setOnClickListener {
+                deleteWorkout(selectedWorkout.id)
+                workoutList.removeAt(workoutList.indexOf(selectedWorkout))
+                workoutAdapter.notifyDataSetChanged()
             }
         }
     }

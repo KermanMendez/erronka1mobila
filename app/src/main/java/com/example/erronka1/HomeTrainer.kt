@@ -14,7 +14,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.erronka1.databinding.ActivityHomeTrainerBinding
 import com.example.erronka1.databinding.ActivityNewWorkoutBinding
-import com.example.erronka1.databinding.ActivityUserProfileBinding
+import com.example.erronka1.databinding.ActivitySettingsBinding
 import com.example.erronka1.db.FirebaseSingleton
 import com.example.erronka1.model.Ariketa
 import com.example.erronka1.model.Workout
@@ -54,8 +54,8 @@ class HomeTrainer : AppCompatActivity() {
                 up = true
             }
         }
-        binding.ivProfile.setOnClickListener {
-            showUserProfileDialog()
+        binding.ivSettings.setOnClickListener {
+            showUserSettingsDialog()
         }
         binding.btnEditWorkout.setOnClickListener {
 
@@ -279,14 +279,14 @@ class HomeTrainer : AppCompatActivity() {
             }
     }
 
-    private fun showUserProfileDialog() {
+    private fun showUserSettingsDialog() {
 
-        val userBinding = ActivityUserProfileBinding.inflate(layoutInflater)
+        val settingsBinding = ActivitySettingsBinding.inflate(layoutInflater)
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, language)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        userBinding.spLanguages.adapter = adapter
-        userBinding.spLanguages.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        settingsBinding.spLanguages.adapter = adapter
+        settingsBinding.spLanguages.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 selectedLanguageChoice = language[position]
             }
@@ -294,7 +294,7 @@ class HomeTrainer : AppCompatActivity() {
         }
 
         val dialog = Dialog(this)
-        dialog.setContentView(userBinding.root)
+        dialog.setContentView(settingsBinding.root)
         dialog.show()
     }
 

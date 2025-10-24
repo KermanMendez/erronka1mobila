@@ -46,6 +46,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
+        android:id="@+id/llProfile"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
@@ -58,6 +59,21 @@
             android:layout_height="30dp"
             android:background="@drawable/rounded_borders"
             android:src="@drawable/outline_person_24"
+            android:contentDescription="@string/profile"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@id/llProfile"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_margin="6dp">
+        <ImageView
+            android:id="@+id/ivSettings"
+            android:layout_marginStart="10dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@drawable/rounded_borders"
+            android:src="@drawable/outline_settings_24"
             android:contentDescription="@string/profile"/>
     </LinearLayout>
 

@@ -16,7 +16,7 @@
         android:background="@drawable/rounded_borders"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/outline_arrow_left_alt_24"
+        android:src="@android:drawable/ic_menu_revert"
         android:contentDescription="@string/back"/>
 
     <LinearLayout
@@ -61,6 +61,18 @@
                 android:layout_height="30dp"
                 android:background="@drawable/rounded_borders"
                 android:src="@drawable/outline_person_24"
+                android:contentDescription="@string/profile"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp">
+            <ImageView
+                android:id="@+id/ivSettings"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:background="@drawable/rounded_borders"
+                android:src="@drawable/outline_settings_24"
                 android:contentDescription="@string/profile"/>
         </LinearLayout>
     </LinearLayout>

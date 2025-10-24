@@ -1,6 +1,7 @@
 package com.example.erronka1
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -26,7 +27,6 @@ class UserProfile : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
         loadUserData()
         setupUpdateButton()
     }
@@ -62,6 +62,8 @@ class UserProfile : AppCompatActivity() {
             user.surname2 = binding.editTextSurname2.text.toString().trim()
             user.birthdate = binding.editTextBirthdate.text.toString().trim()
 
+            Log.d("UserProfile", "Updating user: $user")
+
             val authUser = FirebaseSingleton.auth.currentUser
             if (authUser != null) {
                 FirebaseSingleton.db.collection("users").document(authUser.uid)
@@ -77,8 +79,9 @@ class UserProfile : AppCompatActivity() {
     }
 
     private fun setupUpdateButton() {
-        binding.buttonUpdate.setOnClickListener {
+        binding.btnSaveChanges.setOnClickListener {
             updateUserProfile()
+            Log.d("UserProfile", "Update button clicked")
         }
     }
 }

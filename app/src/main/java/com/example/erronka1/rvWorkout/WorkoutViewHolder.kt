@@ -11,6 +11,7 @@ import com.example.erronka1.R
 import com.example.erronka1.model.Workout
 
 class WorkoutViewHolder (view: View) : RecyclerView.ViewHolder(view) {
+    //val rbSelectWorkout: CheckBox = view.findViewById(R.id.rbSelectWorkout)
     private val tvNameWorkout: TextView = view.findViewById(R.id.tvNameWorkout)
     private val tvLevel: TextView = view.findViewById(R.id.tvLevel)
     private val tvTotalTime: TextView = view.findViewById(R.id.tvTotalTime)

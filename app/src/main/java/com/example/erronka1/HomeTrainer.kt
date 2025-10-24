@@ -56,6 +56,9 @@ class HomeTrainer : AppCompatActivity() {
         binding.ivProfile.setOnClickListener {
             showUserProfileDialog()
         }
+        binding.btnEditWorkout.setOnClickListener {
+
+        }
 
 
         // Show a centered fullscreen splash (tvSplash) while we prepare the screen
@@ -132,15 +135,17 @@ class HomeTrainer : AppCompatActivity() {
             level = 2,
             ariketak = gehitu
         )
-        val workoutList: MutableList<Workout> = mutableListOf(workout, workout2)
+        //val workoutList: MutableList<Workout> = loadAllWorkouts()
 
 
-        workoutAdapter = WorkoutAdapter(workoutList) {}
-        binding.rvTableWorkouts.layoutManager = LinearLayoutManager(this)
-        binding.rvTableWorkouts.adapter = workoutAdapter
+        loadAllWorkouts { workoutList ->
+            workoutAdapter = WorkoutAdapter(workoutList) {}
+            binding.rvTableWorkouts.layoutManager = LinearLayoutManager(this)
+            binding.rvTableWorkouts.adapter = workoutAdapter
 
-        binding.btnCreateWorkout.setOnClickListener {
-            showCreateWorkoutDialog(workoutList)
+            binding.btnCreateWorkout.setOnClickListener {
+                showCreateWorkoutDialog(workoutList)
+            }
         }
     }
 
@@ -170,6 +175,30 @@ class HomeTrainer : AppCompatActivity() {
             }
             .addOnFailureListener { exception ->
                 Log.w("HomeTrainer", "Error getting workouts: ", exception)
+            }
+    }
+    private fun loadAllWorkouts(callback: (MutableList<Workout>) -> Unit) {
+        // Get user lvl to filter workouts
+        val db = FirebaseSingleton.db
+
+        val workoutList: MutableList<Workout> = mutableListOf()
+
+        val workoutsMap = mutableMapOf<String, Workout>()
+        db.collection("workouts")
+            .get()
+            .addOnSuccessListener { result ->
+                for (document in result) {
+                    val workout = document.toObject(Workout::class.java)
+                    workoutsMap[document.id] = workout
+                    workoutList.add(workout)
+                    Log.d("HomeTrainer", "Workout loaded: ${document.id} ->) $workout")
+                }
+                Log.d("HomeTrainer", "Workout size = ${workoutsMap.size} ")
+                callback(workoutList)
+            }
+            .addOnFailureListener { exception ->
+                Log.w("HomeTrainer", "Error getting workouts: ", exception)
+                callback(mutableListOf())
             }
     }
     private fun addWorkoutWithExcercises(workout: Workout) {

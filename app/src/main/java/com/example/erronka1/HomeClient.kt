@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.erronka1.db.FirebaseSingleton
 import com.example.erronka1.databinding.ActivityHomeClientBinding
 import com.example.erronka1.databinding.ActivityUserProfileBinding
+import com.example.erronka1.model.Ariketa
 import com.example.erronka1.model.Workout
 import com.example.erronka1.model.Historic
 import com.example.erronka1.rvWorkout.WorkoutAdapter
@@ -24,14 +25,13 @@ class HomeClient : AppCompatActivity() {
 
     private lateinit var binding: ActivityHomeClientBinding
     private var hideRunnable: Runnable? = null
-<<<<<<< HEAD
+
     private lateinit var workoutAdapter: WorkoutAdapter
     private var language = listOf("Español", "Euskara", "English")
     private var selectedLanguageChoice: String = language[0]
-=======
+
     private var workoutsList = mutableListOf<Workout>()
-    private lateinit var workoutAdapter: WorkoutAdapter
->>>>>>> 44cfb854dbd31d19b35b1d60e8666c5ad0c18b1a
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -115,7 +115,7 @@ class HomeClient : AppCompatActivity() {
             startActivity(intent)
         }
 
-<<<<<<< HEAD
+
         binding.ivProfile.setOnClickListener {
             showUserProfileDialog()
         }
@@ -144,8 +144,8 @@ class HomeClient : AppCompatActivity() {
 
 
         workoutAdapter = WorkoutAdapter(workoutList) {}
-        binding.rvTableWorkouts.layoutManager = LinearLayoutManager(this)
-        binding.rvTableWorkouts.adapter = workoutAdapter
+        binding.rvWorkouts.layoutManager = LinearLayoutManager(this)
+        binding.rvWorkouts.adapter = workoutAdapter
 
         workout.title = "Cambiado desde app"
 
@@ -154,9 +154,7 @@ class HomeClient : AppCompatActivity() {
         //addWorkoutWithExcercises(workout)
         //editWorkout(workout)
         //deleteWorkout(workout.id)
-=======
 
->>>>>>> 44cfb854dbd31d19b35b1d60e8666c5ad0c18b1a
         showUserHistoric { historicList ->
             Log.d("HomeClient", "User historic loaded: ${historicList.size} entries")
             for (entry in historicList) {

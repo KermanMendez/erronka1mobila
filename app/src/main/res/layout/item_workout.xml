@@ -1,73 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <TableLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:divider="@color/black"
-        android:showDividers="middle"
-        android:stretchColumns="1">
-        <TableRow>
+        android:showDividers="middle">
+        <TableRow tools:ignore="UselessParent">
+            <!--<RadioButton
+                android:id="@+id/rbSelectWorkout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>-->
             <TextView
                 android:id="@+id/tvNameWorkout"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:padding="8dp"
                 android:text="@string/workout_name"
                 android:textStyle="bold"
+                android:ellipsize="end"
+                android:maxLines="1"
                 android:background="@drawable/cell_border"/>
             <TextView
                 android:id="@+id/tvLevel"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:padding="8dp"
                 android:text="@string/level"
                 android:textStyle="bold"
+                android:ellipsize="end"
+                android:maxLines="1"
                 android:background="@drawable/cell_border"/>
             <TextView
                 android:id="@+id/tvTotalTime"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:padding="8dp"
                 android:text="@string/total_time"
                 android:textStyle="bold"
+                android:ellipsize="end"
+                android:maxLines="1"
                 android:background="@drawable/cell_border"/>
             <TextView
                 android:id="@+id/tvExpectedTime"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:padding="8dp"
                 android:text="@string/expected_time"
                 android:textStyle="bold"
+                android:ellipsize="end"
+                android:maxLines="1"
                 android:background="@drawable/cell_border"/>
             <TextView
                 android:id="@+id/tvDate"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:padding="8dp"
                 android:text="@string/date"
                 android:textStyle="bold"
+                android:ellipsize="end"
+                android:maxLines="1"
                 android:background="@drawable/cell_border"/>
             <TextView
                 android:id="@+id/tvDoneExercisesPercent"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:padding="8dp"
-                android:text="@string/done_exercises_porcent"
+                android:text="@string/done_exercises_percent"
                 android:textStyle="bold"
+                android:ellipsize="end"
+                android:maxLines="1"
                 android:background="@drawable/cell_border"/>
             <TextView
                 android:id="@+id/tvWorkoutVideo"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:padding="8dp"
                 android:text="@string/workout_video"
                 android:textStyle="bold"
+                android:ellipsize="end"
+                android:maxLines="1"
                 android:background="@drawable/cell_border"/>
         </TableRow>
     </TableLayout>

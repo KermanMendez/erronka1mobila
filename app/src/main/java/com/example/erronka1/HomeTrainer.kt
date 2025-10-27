@@ -11,24 +11,32 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.erronka1.databinding.ActivityHomeTrainerBinding
 import com.example.erronka1.databinding.ActivityNewWorkoutBinding
 import com.example.erronka1.databinding.ActivitySettingsBinding
 import com.example.erronka1.db.FirebaseSingleton
-import com.example.erronka1.model.Ariketa
+import com.example.erronka1.model.Historic
 import com.example.erronka1.model.Workout
+import com.example.erronka1.rvHistoric.HistoricAdapter
 import com.example.erronka1.rvWorkout.WorkoutAdapter
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class HomeTrainer : AppCompatActivity() {
 
     private lateinit var binding : ActivityHomeTrainerBinding
     private var hideRunnable: Runnable? = null
     private lateinit var workoutAdapter: WorkoutAdapter
+    private lateinit var historicAdapter: HistoricAdapter
     private var selectedWorkout: Workout? = null
+
+    private lateinit var selectedHistoric: Historic
     private var language = listOf("Euskara", "Español", "English")
     private var selectedLanguageChoice: String = language[0]
     private var up: Boolean = false
+    private var historicList = listOf<Historic>()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,15 +55,7 @@ class HomeTrainer : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
-        binding.llOrder.setOnClickListener {
-            if (up) {
-                binding.ivUpDownArrow.setImageResource(R.drawable.outline_keyboard_arrow_down_24)
-                up = false
-            } else {
-                binding.ivUpDownArrow.setImageResource(R.drawable.outline_keyboard_arrow_up_24)
-                up = true
-            }
-        }
+
         binding.ivSettings.setOnClickListener {
             showUserSettingsDialog()
         }
@@ -124,9 +124,18 @@ class HomeTrainer : AppCompatActivity() {
         loadAllWorkouts { workoutList ->
             workoutAdapter = WorkoutAdapter(workoutList) { selectedPosition ->
                 selectedWorkout = workoutList[selectedPosition]
+                lifecycleScope.launch {
+                    historicList = loadWorkoutHistorics(selectedWorkout!!.id)
+                }
             }
-            binding.rvTableWorkouts.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-            binding.rvTableWorkouts.adapter = workoutAdapter
+            binding.rvWorkouts.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL,false)
+            binding.rvWorkouts.adapter = workoutAdapter
+
+            historicAdapter = HistoricAdapter(historicList) { selectedPosition ->
+                selectedHistoric = historicList[selectedPosition]
+            }
+            binding.rvHistorics.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false)
+            binding.rvHistorics.adapter = historicAdapter
 
             binding.btnCreateWorkout.setOnClickListener {
                 showCreateWorkoutDialog(workoutList)
@@ -319,5 +328,62 @@ class HomeTrainer : AppCompatActivity() {
 
             dialog.cancel()
         }
+    }
+    private suspend fun loadWorkoutHistorics(workoutId: String): List<Historic> {
+        var result: List<Historic> = emptyList()
+        val uid = FirebaseSingleton.auth.currentUser?.uid
+        if (uid != null) {
+            val db = FirebaseSingleton.db
+            try {
+                val query = db.collection("users")
+                    .document(uid)
+                    .collection("historic")
+                    .whereEqualTo("workoutId", workoutId)
+                    .orderBy("date", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                    .get()
+                    .await()
+
+                if (!query.isEmpty) {
+                    val list = mutableListOf<Historic>()
+                    for (doc in query.documents) {
+                        val h = Historic(
+                            id = doc.id,
+                            workoutId = doc.getString("workoutId") ?: "",
+                            workoutTitle = "",
+                            date = doc.getString("date") ?: "",
+                            totalTime = doc.getLong("totalTime")?.toInt() ?: 0,
+                            totalReps = doc.getLong("totalReps")?.toInt() ?: 0,
+                            completed = doc.getBoolean("completed") ?: false
+                        )
+                        list.add(h)
+                    }
+
+                    if (workoutId.isNotBlank()) {
+                        try {
+                            val workoutDoc = db.collection("workouts").document(workoutId).get().await()
+                            val title = workoutDoc.getString("name")
+                                ?: workoutDoc.getString("title")
+                                ?: "Workout desconocido"
+                            for (h in list) h.workoutTitle = title
+                        } catch (e: Exception) {
+                            Log.w("HomeClient", "Failed to load workout title for $workoutId", e)
+                            for (h in list) h.workoutTitle = "Workout desconocido"
+                        }
+                    } else {
+                        for (h in list) h.workoutTitle = "Workout desconocido"
+                    }
+
+                    result = list
+                } else {
+                    Log.d("HomeClient", "No historic entries for workoutId=$workoutId")
+                }
+            } catch (e: Exception) {
+                Log.w("HomeClient", "Error loading historic list for workoutId=$workoutId", e)
+            }
+        } else {
+            Log.w("HomeClient", "No authenticated user")
+        }
+
+        return result
     }
 }

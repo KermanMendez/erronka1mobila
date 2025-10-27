@@ -14,11 +14,11 @@ import com.example.erronka1.model.Workout
 
 class WorkoutViewHolder (view: View) : RecyclerView.ViewHolder(view) {
 
-    private val tvWorkoutTitle: TextView = view.findViewById(R.id.tvWorkoutTitle)
     private val workoutSelectionCard: CardView = view.findViewById(R.id.workoutSelectionCard)
+    private val title: TextView = view.findViewById(R.id.tvWorkoutTitle)
     fun render(workout: Workout, onItemSelected: (Int) -> Unit) {
 
-        tvWorkoutTitle.text = workout.title
+        title.text = workout.title
 
         val color = if (workout.isSelected) {
             R.color.background_workout
@@ -29,4 +29,5 @@ class WorkoutViewHolder (view: View) : RecyclerView.ViewHolder(view) {
         workoutSelectionCard.setCardBackgroundColor(ContextCompat.getColor(workoutSelectionCard.context, color))
         itemView.setOnClickListener { onItemSelected(layoutPosition) }
     }
+
 }

@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.erronka1.db.FirebaseSingleton
 import com.example.erronka1.databinding.ActivityHomeClientBinding
@@ -19,7 +20,11 @@ import com.example.erronka1.databinding.ActivitySettingsBinding
 import com.example.erronka1.model.Ariketa
 import com.example.erronka1.model.Workout
 import com.example.erronka1.model.Historic
+import com.example.erronka1.rvHistoric.HistoricAdapter
 import com.example.erronka1.rvWorkout.WorkoutAdapter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlin.text.get
 import kotlin.text.toInt
@@ -30,11 +35,15 @@ class HomeClient : AppCompatActivity() {
     private var hideRunnable: Runnable? = null
 
     private lateinit var workoutAdapter: WorkoutAdapter
+    private lateinit var historicAdapter: HistoricAdapter
     private lateinit var selectedWorkout: Workout
+    private lateinit var selectedHistoric: Historic
     private var language = listOf("Euskara", "Español", "English")
     private var selectedLanguageChoice: String = language[0]
 
-    private var workoutsList = mutableListOf<Workout>()
+    //private var workoutsList = mutableListOf<Workout>()
+    private var historicList = listOf<Historic>()
+    private var prevSelectedPosition = -1
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -80,6 +89,7 @@ class HomeClient : AppCompatActivity() {
                 binding.splashOverlay.visibility = View.GONE
                 // Show header elements after splash is hidden
                 binding.ivBacktoLogin.visibility = View.VISIBLE
+                binding.rvWorkouts.visibility = View.VISIBLE
                 //binding.tvTitle.visibility = View.VISIBLE
                 // Setup RecyclerView and load workouts AFTER splash is hidden
                 //setupRecyclerView()
@@ -119,40 +129,47 @@ class HomeClient : AppCompatActivity() {
             startActivity(intent)
         }
 
-
+        binding.ivProfile.setOnClickListener {
+            val intent = android.content.Intent(this, UserProfile::class.java)
+            startActivity(intent)
+            finish()
+        }
 
         binding.ivSettings.setOnClickListener {
             showSettingsDialog()
         }
 
 
-        /*val gehitu: List<Ariketa> = listOf(
-            Ariketa(izena = "Jumping Jacks", reps = 20, sets = 3),
-            Ariketa(izena = "Push-ups", reps = 10, sets = 3),
-            Ariketa(izena = "Bodyweight Squats", reps = 15, sets = 3),
-            Ariketa(izena = "Plank", reps = 30, sets = 3)
-        )
-
-        val workout: Workout = Workout(
-            title = "Full Body Beginner",
-            description = "A",
-            level = 1,
-            ariketak = gehitu
-        )
-        val workout2: Workout = Workout(
-            title = "Egunon",
-            description = "Oso txarto",
-            level = 2,
-            ariketak = gehitu
-        )
-        val workoutList: List<Workout> = listOf(workout, workout2)*/
 
         loadAllWorkouts { workoutList ->
             workoutAdapter = WorkoutAdapter(workoutList) { selectedPosition ->
+                if (::selectedWorkout.isInitialized) {
+                    if (selectedWorkout.isSelected && prevSelectedPosition != -1) {
+                        selectedWorkout.isSelected = false
+                        workoutAdapter.notifyItemChanged(prevSelectedPosition)
+                    }
+                }
                 selectedWorkout = workoutList[selectedPosition]
+                selectedWorkout.isSelected = true
+                workoutAdapter.notifyItemChanged(selectedPosition)
+                lifecycleScope.launch {
+                    historicList = loadWorkoutHistorics(selectedWorkout.id)
+                }
+                prevSelectedPosition = selectedPosition
             }
-            binding.rvWorkouts.layoutManager = LinearLayoutManager(this)
+
+            binding.rvWorkouts.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL,false)
             binding.rvWorkouts.adapter = workoutAdapter
+
+            if (::selectedWorkout.isInitialized) {
+                historicAdapter = HistoricAdapter(historicList) { selectedPosition ->
+                    selectedHistoric = historicList[selectedPosition]
+                    Log.d("", "Selected historic: $selectedHistoric")
+                }
+                binding.rvHistorics.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL,false)
+                binding.rvHistorics.adapter = historicAdapter
+            }
+
         }
 
 
@@ -171,7 +188,7 @@ class HomeClient : AppCompatActivity() {
         super.onDestroy()
     }
 
-    private fun setupRecyclerView() {
+    /*private fun setupRecyclerView() {
         workoutAdapter = WorkoutAdapter(workoutsList) { position ->
             // Handle workout selection - you can add navigation to workout detail here
             val selectedWorkout = workoutsList[position]
@@ -183,7 +200,7 @@ class HomeClient : AppCompatActivity() {
             layoutManager = LinearLayoutManager(this@HomeClient)
             adapter = workoutAdapter
         }
-    }
+    }*/
 
     /*private fun showWorkouts() {
         // Get user lvl to filter workouts

@@ -121,33 +121,11 @@ class HomeTrainer : AppCompatActivity() {
                 }
         }
 
-        /*val gehitu: List<Ariketa> = listOf(
-            Ariketa(izena = "Jumping Jacks", reps = 20, sets = 3),
-            Ariketa(izena = "Push-ups", reps = 10, sets = 3),
-            Ariketa(izena = "Bodyweight Squats", reps = 15, sets = 3),
-            Ariketa(izena = "Plank", reps = 30, sets = 3)
-        )
-
-        val workout: Workout = Workout(
-            title = "Full Body Beginner",
-            description = "A",
-            level = 1,
-            ariketak = gehitu
-        )
-        val workout2: Workout = Workout(
-            title = "Egunon",
-            description = "Oso txarto",
-            level = 2,
-            ariketak = gehitu
-        )
-        val workoutList: MutableList<Workout> = loadAllWorkouts()*/
-
-
         loadAllWorkouts { workoutList ->
             workoutAdapter = WorkoutAdapter(workoutList) { selectedPosition ->
                 selectedWorkout = workoutList[selectedPosition]
             }
-            binding.rvTableWorkouts.layoutManager = LinearLayoutManager(this)
+            binding.rvTableWorkouts.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
             binding.rvTableWorkouts.adapter = workoutAdapter
 
             binding.btnCreateWorkout.setOnClickListener {
@@ -332,6 +310,7 @@ class HomeTrainer : AppCompatActivity() {
                 newWorkoutBinding.etDescription.text.toString(),
                 newWorkoutBinding.npLevel.value,
                 newWorkoutBinding.etVideo.text.toString(),
+                false,
                 listOf()
             )
             addWorkoutWithExcercises(workout)

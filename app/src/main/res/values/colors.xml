@@ -4,6 +4,8 @@
     <color name="white">#FFFFFFFF</color>
     <color name="purple_200">#7613EF</color>
 
+    <color name="background_workout">#FF081A4A</color>
+    <color name="background_disabled">#2E3F56</color>
 
     <color name="settings_text_title">#000000</color>
 </resources>

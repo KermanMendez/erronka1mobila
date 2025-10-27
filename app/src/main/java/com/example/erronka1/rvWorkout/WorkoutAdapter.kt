@@ -14,21 +14,8 @@ class WorkoutAdapter (private val workouts: List<Workout>, private val onWorkout
         return WorkoutViewHolder(view)
     }
 
-    private var selectedPosition = -1
-
     override fun onBindViewHolder(holder: WorkoutViewHolder, position: Int) {
-        holder.render(workouts[position])
-        holder.rbSelectWorkout.isChecked = position == selectedPosition
-
-        holder.itemView.setOnClickListener {
-            selectedPosition = holder.adapterPosition
-            notifyDataSetChanged()
-            onWorkoutSelected(selectedPosition)
-        }
-        /*holder.render(workouts[position])
-        holder.itemView.setOnClickListener {
-            onWorkoutSelected(position)
-        }*/
+        holder.render(workouts[position], onWorkoutSelected)
     }
 
     override fun getItemCount(): Int {

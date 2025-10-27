@@ -8,5 +8,6 @@ data class Workout(
     var description: String = "",
     var level: Int = 0,
     var video: String = "",
+    @get:Exclude var isSelected: Boolean = false,
     @get:Exclude var ariketak: List<Ariketa> = emptyList()
 )

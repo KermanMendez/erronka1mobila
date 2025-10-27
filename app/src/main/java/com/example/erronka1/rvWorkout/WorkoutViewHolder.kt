@@ -6,29 +6,27 @@ import android.view.View
 import android.widget.CheckBox
 import android.widget.RadioButton
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.erronka1.R
 import com.example.erronka1.model.Workout
 
 class WorkoutViewHolder (view: View) : RecyclerView.ViewHolder(view) {
-    val rbSelectWorkout: RadioButton = view.findViewById(R.id.rbSelectWorkout)
-    private val tvNameWorkout: TextView = view.findViewById(R.id.tvNameWorkout)
-    private val tvLevel: TextView = view.findViewById(R.id.tvLevel)
-    private val tvTotalTime: TextView = view.findViewById(R.id.tvTotalTime)
-    private val tvExpectedTime: TextView = view.findViewById(R.id.tvExpectedTime)
-    private val tvDate: TextView = view.findViewById(R.id.tvDate)
-    private val tvDoneExercisesPercent: TextView = view.findViewById(R.id.tvDoneExercisesPercent)
 
+    private val tvWorkoutTitle: TextView = view.findViewById(R.id.tvWorkoutTitle)
+    private val workoutSelectionCard: CardView = view.findViewById(R.id.workoutSelectionCard)
+    fun render(workout: Workout, onItemSelected: (Int) -> Unit) {
 
-    fun render(workout: Workout) {
+        tvWorkoutTitle.text = workout.title
 
-        tvNameWorkout.text = workout.title
-        tvLevel.text = workout.level.toString()
-        tvTotalTime.text = workout.description
-        /*tvExpectedTime.text =
-        tvDate.text =
-        tvDoneExercisesPercent.text = */
+        val color = if (workout.isSelected) {
+            R.color.background_workout
+        } else {
+            R.color.background_disabled
+        }
 
+        workoutSelectionCard.setCardBackgroundColor(ContextCompat.getColor(workoutSelectionCard.context, color))
+        itemView.setOnClickListener { onItemSelected(layoutPosition) }
     }
 }

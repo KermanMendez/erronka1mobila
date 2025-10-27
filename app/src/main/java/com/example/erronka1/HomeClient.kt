@@ -20,6 +20,9 @@ import com.example.erronka1.model.Ariketa
 import com.example.erronka1.model.Workout
 import com.example.erronka1.model.Historic
 import com.example.erronka1.rvWorkout.WorkoutAdapter
+import kotlinx.coroutines.tasks.await
+import kotlin.text.get
+import kotlin.text.toInt
 
 class HomeClient : AppCompatActivity() {
 
@@ -153,8 +156,6 @@ class HomeClient : AppCompatActivity() {
         }
 
 
-
-
         /*showUserHistoric { historicList ->
             Log.d("HomeClient", "User historic loaded: ${historicList.size} entries")
             for (entry in historicList) {
@@ -259,7 +260,7 @@ class HomeClient : AppCompatActivity() {
             }
     }
 
-    private fun showUserHistoric(onComplete: (List<Historic>) -> Unit = {}) {
+    /*private fun showUserHistoric(onComplete: (List<Historic>) -> Unit = {}) {
         val uid = FirebaseSingleton.auth.currentUser?.uid ?: return
         val db = FirebaseSingleton.db
 
@@ -332,6 +333,64 @@ class HomeClient : AppCompatActivity() {
                 Log.w("HomeClient", "Error obteniendo histórico del usuario: ", exception)
                 onComplete(historyList)
             }
+    }*/
+
+    private suspend fun loadWorkoutHistorics(workoutId: String): List<Historic> {
+        var result: List<Historic> = emptyList()
+        val uid = FirebaseSingleton.auth.currentUser?.uid
+        if (uid != null) {
+            val db = FirebaseSingleton.db
+            try {
+                val query = db.collection("users")
+                    .document(uid)
+                    .collection("historic")
+                    .whereEqualTo("workoutId", workoutId)
+                    .orderBy("date", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                    .get()
+                    .await()
+
+                if (!query.isEmpty) {
+                    val list = mutableListOf<Historic>()
+                    for (doc in query.documents) {
+                        val h = Historic(
+                            id = doc.id,
+                            workoutId = doc.getString("workoutId") ?: "",
+                            workoutTitle = "",
+                            date = doc.getString("date") ?: "",
+                            totalTime = doc.getLong("totalTime")?.toInt() ?: 0,
+                            totalReps = doc.getLong("totalReps")?.toInt() ?: 0,
+                            completed = doc.getBoolean("completed") ?: false
+                        )
+                        list.add(h)
+                    }
+
+                    if (workoutId.isNotBlank()) {
+                        try {
+                            val workoutDoc = db.collection("workouts").document(workoutId).get().await()
+                            val title = workoutDoc.getString("name")
+                                ?: workoutDoc.getString("title")
+                                ?: "Workout desconocido"
+                            for (h in list) h.workoutTitle = title
+                        } catch (e: Exception) {
+                            Log.w("HomeClient", "Failed to load workout title for $workoutId", e)
+                            for (h in list) h.workoutTitle = "Workout desconocido"
+                        }
+                    } else {
+                        for (h in list) h.workoutTitle = "Workout desconocido"
+                    }
+
+                    result = list
+                } else {
+                    Log.d("HomeClient", "No historic entries for workoutId=$workoutId")
+                }
+            } catch (e: Exception) {
+                Log.w("HomeClient", "Error loading historic list for workoutId=$workoutId", e)
+            }
+        } else {
+            Log.w("HomeClient", "No authenticated user")
+        }
+
+        return result
     }
 
     private fun showSettingsDialog() {

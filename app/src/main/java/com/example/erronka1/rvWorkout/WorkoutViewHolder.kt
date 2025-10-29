@@ -18,7 +18,7 @@ class WorkoutViewHolder (view: View) : RecyclerView.ViewHolder(view) {
     private val title: TextView = view.findViewById(R.id.tvWorkoutTitle)
     fun render(workout: Workout, onItemSelected: (Int) -> Unit) {
 
-        title.text = workout.title
+        title.text = workout.name
 
         val color = if (workout.isSelected) {
             R.color.background_workout

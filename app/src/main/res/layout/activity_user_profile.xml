@@ -32,16 +32,6 @@
           android:textSize="30sp"
           android:textStyle="bold" />
 
-      <ImageView
-          android:id="@+id/ivBacktoLogin"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:background="@drawable/rounded_borders"
-          android:contentDescription="@string/back"
-          android:padding="10dp"
-          android:src="@android:drawable/ic_menu_revert"
-          app:layout_constraintEnd_toEndOf="parent"
-          app:layout_constraintTop_toTopOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
@@ -106,5 +96,11 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
         android:text="@string/save_changes"/>
+    <Button
+        android:id="@+id/btnBackProfile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:text="@string/back"/>
   </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

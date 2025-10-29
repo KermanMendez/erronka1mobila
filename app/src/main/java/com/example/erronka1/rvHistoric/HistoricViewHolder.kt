@@ -9,7 +9,7 @@ import com.example.erronka1.model.Workout
 
 class HistoricViewHolder (view: View) : RecyclerView.ViewHolder(view) {
 
-    private val tvWorkoutTitle: TextView = view.findViewById(R.id.tvWorkoutTitle)
+    private val tvWorkoutTitle: TextView = view.findViewById(R.id.tvHistoricTitle)
     private val tvDate: TextView = view.findViewById(R.id.tvDate)
     private val tvTotalTime: TextView = view.findViewById(R.id.tvTotalTime)
     private val tvTotalReps: TextView = view.findViewById(R.id.tvTotalReps)

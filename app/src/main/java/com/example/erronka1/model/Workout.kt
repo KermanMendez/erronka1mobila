@@ -4,7 +4,7 @@ import com.google.firebase.firestore.Exclude
 
 data class Workout(
     @get:Exclude var id: String = "",
-    var title: String = "",
+    var name: String = "",
     var description: String = "",
     var level: Int = 0,
     var video: String = "",

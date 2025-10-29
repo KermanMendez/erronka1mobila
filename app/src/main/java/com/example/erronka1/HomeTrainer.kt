@@ -247,7 +247,7 @@ class HomeTrainer : AppCompatActivity() {
         val workoutRef = db.collection("workouts").document(workout.id)
 
         workoutRef.update(
-            "title", workout.title,
+            "name", workout.name,
             "description", workout.description,
             "level", workout.level,
             "video", workout.video

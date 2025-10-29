@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -17,11 +18,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.erronka1.db.FirebaseSingleton
 import com.example.erronka1.databinding.ActivityHomeClientBinding
 import com.example.erronka1.databinding.ActivitySettingsBinding
+import com.example.erronka1.databinding.ActivityUserProfileBinding
 import com.example.erronka1.model.Ariketa
 import com.example.erronka1.model.Workout
 import com.example.erronka1.model.Historic
+import com.example.erronka1.model.User
 import com.example.erronka1.rvHistoric.HistoricAdapter
 import com.example.erronka1.rvWorkout.WorkoutAdapter
+import com.google.firebase.auth.userProfileChangeRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -33,7 +37,7 @@ class HomeClient : AppCompatActivity() {
 
     private lateinit var binding: ActivityHomeClientBinding
     private var hideRunnable: Runnable? = null
-
+    private var currentUser: User? = null
     private lateinit var workoutAdapter: WorkoutAdapter
     private lateinit var historicAdapter: HistoricAdapter
     private lateinit var selectedWorkout: Workout
@@ -90,6 +94,7 @@ class HomeClient : AppCompatActivity() {
                 // Show header elements after splash is hidden
                 binding.ivBacktoLogin.visibility = View.VISIBLE
                 binding.rvWorkouts.visibility = View.VISIBLE
+                binding.rvHistorics.visibility = View.VISIBLE
                 //binding.tvTitle.visibility = View.VISIBLE
                 // Setup RecyclerView and load workouts AFTER splash is hidden
                 //setupRecyclerView()
@@ -130,9 +135,7 @@ class HomeClient : AppCompatActivity() {
         }
 
         binding.ivProfile.setOnClickListener {
-            val intent = android.content.Intent(this, UserProfile::class.java)
-            startActivity(intent)
-            finish()
+            showProfileDialog()
         }
 
         binding.ivSettings.setOnClickListener {
@@ -152,23 +155,27 @@ class HomeClient : AppCompatActivity() {
                 selectedWorkout = workoutList[selectedPosition]
                 selectedWorkout.isSelected = true
                 workoutAdapter.notifyItemChanged(selectedPosition)
+                prevSelectedPosition = selectedPosition
+
                 lifecycleScope.launch {
                     historicList = loadWorkoutHistorics(selectedWorkout.id)
+
+                    historicAdapter = HistoricAdapter(historicList) { selectedPosition ->
+                        selectedHistoric = historicList[selectedPosition]
+                        Log.d("", "Selected historic: $selectedHistoric")
+                    }
+                    binding.rvHistorics.layoutManager = LinearLayoutManager(this@HomeClient, LinearLayoutManager.HORIZONTAL,false)
+                    binding.rvHistorics.adapter = historicAdapter
+                    binding.rvHistorics.visibility = View.VISIBLE
                 }
-                prevSelectedPosition = selectedPosition
+
+
             }
 
             binding.rvWorkouts.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL,false)
             binding.rvWorkouts.adapter = workoutAdapter
+            Log.d("", "Historics"+historicList.toString())
 
-            if (::selectedWorkout.isInitialized) {
-                historicAdapter = HistoricAdapter(historicList) { selectedPosition ->
-                    selectedHistoric = historicList[selectedPosition]
-                    Log.d("", "Selected historic: $selectedHistoric")
-                }
-                binding.rvHistorics.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL,false)
-                binding.rvHistorics.adapter = historicAdapter
-            }
 
         }
 
@@ -264,6 +271,7 @@ class HomeClient : AppCompatActivity() {
             .addOnSuccessListener { result ->
                 for (document in result) {
                     val workout = document.toObject(Workout::class.java)
+                    workout.id = document.id
                     workoutsMap[document.id] = workout
                     workoutList.add(workout)
                     Log.d("HomeTrainer", "Workout loaded: ${document.id} ->) $workout")
@@ -427,6 +435,80 @@ class HomeClient : AppCompatActivity() {
         val dialog = Dialog(this)
         dialog.setContentView(settingsBinding.root)
         dialog.show()
+        settingsBinding.btnBackSettings.setOnClickListener {
+            dialog.cancel()
+        }
+    }
+    private fun showProfileDialog() {
+
+        val profileBinding = ActivityUserProfileBinding.inflate(layoutInflater)
+
+        loadUserData(profileBinding)
+        setupUpdateButton(profileBinding)
+
+
+        val dialog = Dialog(this)
+        dialog.setContentView(profileBinding.root)
+        dialog.window!!.setLayout(1000, 1500)
+        dialog.show()
+        profileBinding.btnBackProfile.setOnClickListener {
+            dialog.cancel()
+        }
+    }
+
+    private fun loadUserData(profileBinding: ActivityUserProfileBinding) {
+        val authUser = FirebaseSingleton.auth.currentUser
+
+        if (authUser != null) {
+            FirebaseSingleton.db.collection("users").document(authUser.uid)
+                .get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        currentUser = document.toObject(User::class.java)
+                        currentUser?.let { user ->
+                            profileBinding.editTextName.setText(user.name ?: "")
+                            profileBinding.editTextSurname.setText(user.surname ?: "")
+                            profileBinding.editTextSurname2.setText(user.surname2 ?: "")
+                            profileBinding.editTextBirthdate.setText(user.birthdate ?: "")
+                        }
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(this, "Error loading profile: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+        }
+    }
+
+    private fun updateUserProfile(profileBinding: ActivityUserProfileBinding) {
+        Log.d("UserProfile", "Updating user:")
+        currentUser?.let { user ->
+
+            user.name = profileBinding.editTextName.text.toString().trim()
+            user.surname = profileBinding.editTextSurname.text.toString().trim()
+            user.surname2 = profileBinding.editTextSurname2.text.toString().trim()
+            user.birthdate = profileBinding.editTextBirthdate.text.toString().trim()
+
+
+
+            val authUser = FirebaseSingleton.auth.currentUser
+            if (authUser != null) {
+                FirebaseSingleton.db.collection("users").document(authUser.uid)
+                    .set(user)
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(this, "Error updating profile: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+            }
+        }
+    }
+
+    private fun setupUpdateButton(profileBinding: ActivityUserProfileBinding) {
+        profileBinding.btnSaveChanges.setOnClickListener {
+            updateUserProfile(profileBinding)
+            Log.d("UserProfile", "Update button clicked")
+        }
     }
 
 

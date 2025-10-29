@@ -9,6 +9,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBaseline_toTopOf="parent"
+        android:background="@color/purple_200"
         android:orientation="vertical">
 
         <TextView

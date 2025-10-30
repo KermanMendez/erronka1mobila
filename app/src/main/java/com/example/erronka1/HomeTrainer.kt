@@ -1,6 +1,7 @@
 package com.example.erronka1
 
 import android.app.Dialog
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -8,6 +9,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
@@ -23,6 +25,7 @@ import com.example.erronka1.rvHistoric.HistoricAdapter
 import com.example.erronka1.rvWorkout.WorkoutAdapter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlin.apply
 
 class HomeTrainer : AppCompatActivity() {
 
@@ -40,6 +43,7 @@ class HomeTrainer : AppCompatActivity() {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        applyTheme()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = ActivityHomeTrainerBinding.inflate(layoutInflater)
@@ -293,6 +297,11 @@ class HomeTrainer : AppCompatActivity() {
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
 
+        settingsBinding.switchDarkMode.isChecked = isDarkModeEnabled()
+        settingsBinding.switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
+            setDarkMode(isChecked)
+        }
+
         val dialog = Dialog(this)
         dialog.setContentView(settingsBinding.root)
         dialog.show()
@@ -386,4 +395,26 @@ class HomeTrainer : AppCompatActivity() {
 
         return result
     }
+
+    private fun isDarkModeEnabled(): Boolean {
+        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        return prefs.getBoolean("dark_mode", false)
+    }
+
+    private fun setDarkMode(enabled: Boolean) {
+        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("dark_mode", enabled).apply()
+
+        AppCompatDelegate.setDefaultNightMode(
+            if (enabled) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+        )
+    }
+
+    private fun applyTheme() {
+        val enabled = isDarkModeEnabled()
+        AppCompatDelegate.setDefaultNightMode(
+            if (enabled) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+        )
+    }
+
 }

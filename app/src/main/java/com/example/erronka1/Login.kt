@@ -12,9 +12,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.erronka1.db.FirebaseSingleton
 import com.example.erronka1.databinding.LoginBinding
-import com.google.firebase.auth.auth
-import kotlin.text.get
-import kotlin.toString
 
 class Login : AppCompatActivity() {
 

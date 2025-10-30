@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.constraintlayout.motion.widget.KeyPosition
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
@@ -19,8 +20,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.erronka1.databinding.ActivityHomeTrainerBinding
 import com.example.erronka1.databinding.ActivityNewWorkoutBinding
 import com.example.erronka1.databinding.ActivitySettingsBinding
+import com.example.erronka1.databinding.ActivityUserProfileBinding
 import com.example.erronka1.db.FirebaseSingleton
 import com.example.erronka1.model.Historic
+import com.example.erronka1.model.User
 import com.example.erronka1.model.Workout
 import com.example.erronka1.rvHistoric.HistoricAdapter
 import com.example.erronka1.rvWorkout.WorkoutAdapter
@@ -31,6 +34,7 @@ class HomeTrainer : AppCompatActivity() {
 
     private lateinit var binding : ActivityHomeTrainerBinding
     private var hideRunnable: Runnable? = null
+    private var currentUser: User? = null
     private lateinit var workoutAdapter: WorkoutAdapter
     private lateinit var historicAdapter: HistoricAdapter
     private lateinit var selectedWorkout: Workout
@@ -62,10 +66,9 @@ class HomeTrainer : AppCompatActivity() {
         binding.ivSettings.setOnClickListener {
             showUserSettingsDialog()
         }
+
         binding.ivProfile.setOnClickListener {
-            val intent = android.content.Intent(this, UserProfile::class.java)
-            startActivity(intent)
-            finish()
+            showProfileDialog()
         }
 
 
@@ -143,7 +146,14 @@ class HomeTrainer : AppCompatActivity() {
 
             binding.btnCreateWorkout.setOnClickListener {
                 showCreateWorkoutDialog(workoutList)
-                workoutAdapter.notifyDataSetChanged()
+            }
+            binding.btnEditWorkout.setOnClickListener {
+                if (::selectedWorkout.isInitialized) {
+                    Log.i("","Editing workout: ${selectedWorkout.id} - ${selectedWorkout.name}")
+                    showEditWorkoutDialog(workoutList, prevSelectedPosition)
+                } else {
+                    Toast.makeText(this, "Selecciona un entrenamiento primero", Toast.LENGTH_SHORT).show()
+                }
             }
             binding.btnDeleteWorkout.setOnClickListener {
                 if (::selectedWorkout.isInitialized) {
@@ -156,6 +166,7 @@ class HomeTrainer : AppCompatActivity() {
                 }
             }
         }
+
     }
 
     override fun onDestroy() {
@@ -199,6 +210,7 @@ class HomeTrainer : AppCompatActivity() {
                 for (document in result) {
                     val workout = document.toObject(Workout::class.java)
                     workoutsMap[document.id] = workout
+                    workout.id = document.id
                     workoutList.add(workout)
                     Log.d("HomeTrainer", "Workout loaded: ${document.id} ->) $workout")
                 }
@@ -239,7 +251,7 @@ class HomeTrainer : AppCompatActivity() {
 
     private fun editWorkout(workout: Workout) {
         val db = FirebaseSingleton.db
-
+        Log.i("","Editing workout in dialog: ${workout.id} -------------- ${workout.name}")
         if (workout.id.isBlank()) {
             Log.w("HomeClient", "editWorkout: workout.id está vacío, no se puede actualizar")
             return
@@ -331,66 +343,46 @@ class HomeTrainer : AppCompatActivity() {
             addWorkoutWithExcercises(workout)
             workoutList.add(workout)
             Log.i("",workoutList.toString())
-
+            workoutAdapter.notifyDataSetChanged()
             dialog.cancel()
         }
     }
-    private suspend fun loadWorkoutHistorics(workoutId: String): List<Historic> {
-        var result: List<Historic> = emptyList()
-        val uid = FirebaseSingleton.auth.currentUser?.uid
-        if (uid != null) {
-            val db = FirebaseSingleton.db
-            try {
-                val query = db.collection("users")
-                    .document(uid)
-                    .collection("historic")
-                    .whereEqualTo("workoutId", workoutId)
-                    .orderBy("date", com.google.firebase.firestore.Query.Direction.DESCENDING)
-                    .get()
-                    .await()
+    private fun showEditWorkoutDialog(workoutList: MutableList<Workout>, selectedPosition: Int) {
 
-                if (!query.isEmpty) {
-                    val list = mutableListOf<Historic>()
-                    for (doc in query.documents) {
-                        val h = Historic(
-                            id = doc.id,
-                            workoutId = doc.getString("workoutId") ?: "",
-                            workoutTitle = "",
-                            date = doc.getString("date") ?: "",
-                            totalTime = doc.getLong("totalTime")?.toInt() ?: 0,
-                            totalReps = doc.getLong("totalReps")?.toInt() ?: 0,
-                            completed = doc.getBoolean("completed") ?: false
-                        )
-                        list.add(h)
-                    }
+        val newWorkoutBinding = ActivityNewWorkoutBinding.inflate(layoutInflater)
 
-                    if (workoutId.isNotBlank()) {
-                        try {
-                            val workoutDoc = db.collection("workouts").document(workoutId).get().await()
-                            val title = workoutDoc.getString("name")
-                                ?: workoutDoc.getString("title")
-                                ?: "Workout desconocido"
-                            for (h in list) h.workoutTitle = title
-                        } catch (e: Exception) {
-                            Log.w("HomeClient", "Failed to load workout title for $workoutId", e)
-                            for (h in list) h.workoutTitle = "Workout desconocido"
-                        }
-                    } else {
-                        for (h in list) h.workoutTitle = "Workout desconocido"
-                    }
+        newWorkoutBinding.npLevel.minValue = 1
+        newWorkoutBinding.npLevel.maxValue = 5
 
-                    result = list
-                } else {
-                    Log.d("HomeClient", "No historic entries for workoutId=$workoutId")
-                }
-            } catch (e: Exception) {
-                Log.w("HomeClient", "Error loading historic list for workoutId=$workoutId", e)
-            }
-        } else {
-            Log.w("HomeClient", "No authenticated user")
+        newWorkoutBinding.tvTitle.setText("Workout editatu")
+        newWorkoutBinding.etTitle.setText(selectedWorkout.name)
+        newWorkoutBinding.etDescription.setText(selectedWorkout.description)
+        newWorkoutBinding.npLevel.value = selectedWorkout.level
+        newWorkoutBinding.etVideo.setText(selectedWorkout.video)
+
+
+        val dialog = Dialog(this)
+        dialog.setContentView(newWorkoutBinding.root)
+        dialog.show()
+
+        newWorkoutBinding.btnCancel.setOnClickListener {
+            dialog.cancel()
         }
-
-        return result
+        newWorkoutBinding.btnConfirm.setOnClickListener {
+            val workoutNew: Workout = Workout(
+                selectedWorkout.id,
+                newWorkoutBinding.etTitle.text.toString(),
+                newWorkoutBinding.etDescription.text.toString(),
+                newWorkoutBinding.npLevel.value,
+                newWorkoutBinding.etVideo.text.toString(),
+                false,
+                listOf()
+            )
+            editWorkout(workoutNew)
+            workoutList[selectedPosition] = workoutNew
+            workoutAdapter.notifyDataSetChanged()
+            dialog.cancel()
+        }
     }
 
     private fun isDarkModeEnabled(): Boolean {
@@ -412,6 +404,75 @@ class HomeTrainer : AppCompatActivity() {
         AppCompatDelegate.setDefaultNightMode(
             if (enabled) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
         )
+    }
+    private fun showProfileDialog() {
+
+        val profileBinding = ActivityUserProfileBinding.inflate(layoutInflater)
+
+        loadUserData(profileBinding)
+        setupUpdateButton(profileBinding)
+
+
+        val dialog = Dialog(this)
+        dialog.setContentView(profileBinding.root)
+        dialog.window!!.setLayout(1000, 1500)
+        dialog.show()
+        profileBinding.btnBackProfile.setOnClickListener {
+            dialog.cancel()
+        }
+    }
+    private fun loadUserData(profileBinding: ActivityUserProfileBinding) {
+        val authUser = FirebaseSingleton.auth.currentUser
+
+        if (authUser != null) {
+            FirebaseSingleton.db.collection("users").document(authUser.uid)
+                .get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        currentUser = document.toObject(User::class.java)
+                        currentUser?.let { user ->
+                            profileBinding.editTextName.setText(user.name ?: "")
+                            profileBinding.editTextSurname.setText(user.surname ?: "")
+                            profileBinding.editTextSurname2.setText(user.surname2 ?: "")
+                            profileBinding.editTextBirthdate.setText(user.birthdate ?: "")
+                        }
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(this, "Error loading profile: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+        }
+    }
+
+    private fun updateUserProfile(profileBinding: ActivityUserProfileBinding) {
+        Log.d("UserProfile", "Updating user:")
+        currentUser?.let { user ->
+
+            user.name = profileBinding.editTextName.text.toString().trim()
+            user.surname = profileBinding.editTextSurname.text.toString().trim()
+            user.surname2 = profileBinding.editTextSurname2.text.toString().trim()
+            user.birthdate = profileBinding.editTextBirthdate.text.toString().trim()
+
+
+
+            val authUser = FirebaseSingleton.auth.currentUser
+            if (authUser != null) {
+                FirebaseSingleton.db.collection("users").document(authUser.uid)
+                    .set(user)
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(this, "Error updating profile: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+            }
+        }
+    }
+    private fun setupUpdateButton(profileBinding: ActivityUserProfileBinding) {
+        profileBinding.btnSaveChanges.setOnClickListener {
+            updateUserProfile(profileBinding)
+            Log.d("UserProfile", "Update button clicked")
+        }
     }
 
 }

@@ -21,20 +21,13 @@ import com.example.erronka1.db.FirebaseSingleton
 import com.example.erronka1.databinding.ActivityHomeClientBinding
 import com.example.erronka1.databinding.ActivitySettingsBinding
 import com.example.erronka1.databinding.ActivityUserProfileBinding
-import com.example.erronka1.model.Ariketa
 import com.example.erronka1.model.Workout
 import com.example.erronka1.model.Historic
 import com.example.erronka1.model.User
 import com.example.erronka1.rvHistoric.HistoricAdapter
 import com.example.erronka1.rvWorkout.WorkoutAdapter
-import com.google.firebase.auth.userProfileChangeRequest
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import kotlin.apply
-import kotlin.text.get
-import kotlin.text.toInt
 
 class HomeClient : AppCompatActivity() {
 

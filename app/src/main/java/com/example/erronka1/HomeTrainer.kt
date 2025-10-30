@@ -25,7 +25,6 @@ import com.example.erronka1.rvHistoric.HistoricAdapter
 import com.example.erronka1.rvWorkout.WorkoutAdapter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import kotlin.apply
 
 class HomeTrainer : AppCompatActivity() {
 

@@ -28,6 +28,7 @@ import com.example.erronka1.rvHistoric.HistoricAdapter
 import com.example.erronka1.rvWorkout.WorkoutAdapter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import androidx.core.content.edit
 
 class HomeClient : AppCompatActivity() {
 
@@ -168,7 +169,7 @@ class HomeClient : AppCompatActivity() {
             }
             binding.rvWorkouts.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL,false)
             binding.rvWorkouts.adapter = workoutAdapter
-            Log.d("", "Historics"+historicList.toString())
+            Log.d("", "Historics$historicList")
         }
 
 
@@ -463,10 +464,10 @@ class HomeClient : AppCompatActivity() {
                     if (document.exists()) {
                         currentUser = document.toObject(User::class.java)
                         currentUser?.let { user ->
-                            profileBinding.editTextName.setText(user.name ?: "")
-                            profileBinding.editTextSurname.setText(user.surname ?: "")
-                            profileBinding.editTextSurname2.setText(user.surname2 ?: "")
-                            profileBinding.editTextBirthdate.setText(user.birthdate ?: "")
+                            profileBinding.editTextName.setText(user.name)
+                            profileBinding.editTextSurname.setText(user.surname)
+                            profileBinding.editTextSurname2.setText(user.surname2)
+                            profileBinding.editTextBirthdate.text = user.birthdate
                         }
                     }
                 }
@@ -515,7 +516,7 @@ class HomeClient : AppCompatActivity() {
 
     private fun setDarkMode(enabled: Boolean) {
         val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        prefs.edit().putBoolean("dark_mode", enabled).apply()
+        prefs.edit { putBoolean("dark_mode", enabled) }
 
         AppCompatDelegate.setDefaultNightMode(
             if (enabled) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO

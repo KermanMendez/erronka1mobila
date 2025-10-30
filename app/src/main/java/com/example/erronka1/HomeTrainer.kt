@@ -32,10 +32,7 @@ class HomeTrainer : AppCompatActivity() {
     private lateinit var binding : ActivityHomeTrainerBinding
     private var hideRunnable: Runnable? = null
     private lateinit var workoutAdapter: WorkoutAdapter
-    private lateinit var historicAdapter: HistoricAdapter
     private lateinit var selectedWorkout: Workout
-
-    private lateinit var selectedHistoric: Historic
     private var language = listOf("Euskara", "Español", "English")
     private var selectedLanguageChoice: String = language[0]
     private var prevSelectedPosition = -1

@@ -70,6 +70,7 @@ class UserProfile : AppCompatActivity() {
                     .set(user)
                     .addOnSuccessListener {
                         Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show()
+
                     }
                     .addOnFailureListener { e ->
                         Toast.makeText(this, "Error updating profile: ${e.message}", Toast.LENGTH_SHORT).show()

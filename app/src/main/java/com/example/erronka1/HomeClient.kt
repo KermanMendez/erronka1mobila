@@ -1,7 +1,6 @@
 package com.example.erronka1
 
 import android.app.Dialog
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -28,6 +27,7 @@ import com.example.erronka1.rvHistoric.HistoricAdapter
 import com.example.erronka1.rvWorkout.WorkoutAdapter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import androidx.core.content.edit
 
 class HomeClient : AppCompatActivity() {
 
@@ -39,9 +39,9 @@ class HomeClient : AppCompatActivity() {
     private lateinit var selectedWorkout: Workout
     private lateinit var selectedHistoric: Historic
     private var language = listOf("Euskara", "Español", "English")
+    private var levels = listOf("Guztiak", "1", "2", "3", "4", "5")
     private var selectedLanguageChoice: String = language[0]
-
-    //private var workoutsList = mutableListOf<Workout>()
+    private var selectedLevelChoice: String = levels[0]
     private var historicList = listOf<Historic>()
     private var prevSelectedPosition = -1
 
@@ -125,7 +125,7 @@ class HomeClient : AppCompatActivity() {
             Log.d("HomeClient", "No auth UID available; using fallback for welcome")
             // Keep the splash showing the fallback; the hideRunnable will remove it after timeout
         }*/
-
+        orderWorkouts()
         binding.ivBacktoLogin.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
@@ -140,45 +140,56 @@ class HomeClient : AppCompatActivity() {
         }
 
 
-
-        loadAllWorkouts { workoutList ->
-            workoutAdapter = WorkoutAdapter(workoutList) { selectedPosition ->
-                if (::selectedWorkout.isInitialized) {
-                    if (selectedWorkout.isSelected && prevSelectedPosition != -1) {
-                        selectedWorkout.isSelected = false
-                        workoutAdapter.notifyItemChanged(prevSelectedPosition)
+        binding.spOrder.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                binding.rvHistorics.visibility = View.GONE
+                selectedLevelChoice = levels[position]
+                Log.d("Spinner", "Usuario seleccionó: $selectedLevelChoice")
+                if (binding.spOrder.selectedItem == "Guztiak") {
+                    loadAllWorkouts { workoutList ->
+                        initAdapter(workoutList)
                     }
-                }
-                selectedWorkout = workoutList[selectedPosition]
-                selectedWorkout.isSelected = true
-                workoutAdapter.notifyItemChanged(selectedPosition)
-                prevSelectedPosition = selectedPosition
-
-                lifecycleScope.launch {
-                    historicList = loadWorkoutHistorics(selectedWorkout.id)
-
-                    historicAdapter = HistoricAdapter(historicList) { selectedPosition ->
-                        selectedHistoric = historicList[selectedPosition]
-                        Log.d("", "Selected historic: $selectedHistoric")
+                } else {
+                    loadAllWorkouts { workoutList ->
+                        val filteredWorkouts =
+                            workoutList.filter { it.level == selectedLevelChoice.toInt() }.toMutableList()
+                        Log.i("","--------------${filteredWorkouts.toString()}")
+                        initAdapter(filteredWorkouts)
                     }
-                    binding.rvHistorics.layoutManager = LinearLayoutManager(this@HomeClient, LinearLayoutManager.HORIZONTAL,false)
-                    binding.rvHistorics.adapter = historicAdapter
-                    binding.rvHistorics.visibility = View.VISIBLE
                 }
             }
-            binding.rvWorkouts.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL,false)
-            binding.rvWorkouts.adapter = workoutAdapter
-            Log.d("", "Historics"+historicList.toString())
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
-
-
-        /*showUserHistoric { historicList ->
-            Log.d("HomeClient", "User historic loaded: ${historicList.size} entries")
-            for (entry in historicList) {
-                Log.d("HomeClient", "Historic entry: $entry")
+    }
+    private fun initAdapter(workoutList: MutableList<Workout>) {
+        workoutAdapter = WorkoutAdapter(workoutList) { selectedPosition ->
+            if (::selectedWorkout.isInitialized) {
+                if (selectedWorkout.isSelected && prevSelectedPosition != -1) {
+                    selectedWorkout.isSelected = false
+                    workoutAdapter.notifyItemChanged(prevSelectedPosition)
+                }
             }
-        }*/
+            selectedWorkout = workoutList[selectedPosition]
+            selectedWorkout.isSelected = true
+            workoutAdapter.notifyItemChanged(selectedPosition)
+            prevSelectedPosition = selectedPosition
 
+            lifecycleScope.launch {
+                historicList = loadWorkoutHistorics(selectedWorkout.id)
+
+                historicAdapter = HistoricAdapter(historicList) { selectedPosition ->
+                    selectedHistoric = historicList[selectedPosition]
+                    Log.d("", "Selected historic: $selectedHistoric")
+                }
+                binding.rvHistorics.layoutManager = LinearLayoutManager(this@HomeClient, LinearLayoutManager.VERTICAL,false)
+                binding.rvHistorics.adapter = historicAdapter
+                binding.rvHistorics.visibility = View.VISIBLE
+            }
+        }
+        binding.rvWorkouts.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL,false)
+        binding.rvWorkouts.adapter = workoutAdapter
+        Log.d("", "Historics"+historicList.toString())
     }
 
     override fun onDestroy() {
@@ -463,10 +474,10 @@ class HomeClient : AppCompatActivity() {
                     if (document.exists()) {
                         currentUser = document.toObject(User::class.java)
                         currentUser?.let { user ->
-                            profileBinding.editTextName.setText(user.name ?: "")
-                            profileBinding.editTextSurname.setText(user.surname ?: "")
-                            profileBinding.editTextSurname2.setText(user.surname2 ?: "")
-                            profileBinding.editTextBirthdate.setText(user.birthdate ?: "")
+                            profileBinding.editTextName.setText(user.name)
+                            profileBinding.editTextSurname.setText(user.surname)
+                            profileBinding.editTextSurname2.setText(user.surname2)
+                            profileBinding.editTextBirthdate.text = user.birthdate
                         }
                     }
                 }
@@ -509,13 +520,13 @@ class HomeClient : AppCompatActivity() {
     }
 
     private fun isDarkModeEnabled(): Boolean {
-        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
         return prefs.getBoolean("dark_mode", false)
     }
 
     private fun setDarkMode(enabled: Boolean) {
-        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        prefs.edit().putBoolean("dark_mode", enabled).apply()
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        prefs.edit { putBoolean("dark_mode", enabled) }
 
         AppCompatDelegate.setDefaultNightMode(
             if (enabled) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
@@ -528,6 +539,16 @@ class HomeClient : AppCompatActivity() {
             if (enabled) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
         )
     }
-
+    private fun orderWorkouts() {
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, levels)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spOrder.adapter = adapter
+        binding.spOrder.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedLevelChoice = levels[position]
+            }
+            override fun onNothingSelected(p0: AdapterView<*>?) {}
+        }
+    }
 
 }

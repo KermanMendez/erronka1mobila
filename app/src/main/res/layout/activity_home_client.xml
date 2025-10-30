@@ -34,14 +34,10 @@
             android:background="@drawable/rounded_borders"
             android:gravity="center"
             tools:ignore="UselessParent">
-            <ImageView
-                android:id="@+id/ivUpDownArrow"
-                android:layout_marginStart="10dp"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:background="@drawable/black_border"
-                android:src="@drawable/outline_keyboard_arrow_down_24"
-                android:contentDescription="@string/order_arrow"/>
+            <Spinner
+                android:id="@+id/spOrder"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -88,10 +84,11 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvHistorics"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         app:layout_constraintTop_toBottomOf="@+id/rvWorkouts"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
     <FrameLayout
         android:id="@+id/splashOverlay"

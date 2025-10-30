@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.erronka1.R
 import com.example.erronka1.model.Workout
 
-class WorkoutAdapter (private val workouts: List<Workout>, private val onWorkoutSelected: (Int) -> Unit) :
+class WorkoutAdapter (private var workouts: List<Workout>, private val onWorkoutSelected: (Int) -> Unit) :
     RecyclerView.Adapter<WorkoutViewHolder>(){
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WorkoutViewHolder {

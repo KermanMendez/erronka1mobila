@@ -1,7 +1,6 @@
 package com.example.erronka1
 
 import android.app.Dialog
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -11,24 +10,19 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.constraintlayout.motion.widget.KeyPosition
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.erronka1.databinding.ActivityHomeTrainerBinding
 import com.example.erronka1.databinding.ActivityNewWorkoutBinding
 import com.example.erronka1.databinding.ActivitySettingsBinding
 import com.example.erronka1.databinding.ActivityUserProfileBinding
 import com.example.erronka1.db.FirebaseSingleton
-import com.example.erronka1.model.Historic
 import com.example.erronka1.model.User
 import com.example.erronka1.model.Workout
-import com.example.erronka1.rvHistoric.HistoricAdapter
 import com.example.erronka1.rvWorkout.WorkoutAdapter
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
+import androidx.core.content.edit
 
 class HomeTrainer : AppCompatActivity() {
 
@@ -36,12 +30,11 @@ class HomeTrainer : AppCompatActivity() {
     private var hideRunnable: Runnable? = null
     private var currentUser: User? = null
     private lateinit var workoutAdapter: WorkoutAdapter
-    private lateinit var historicAdapter: HistoricAdapter
-    private lateinit var selectedWorkout: Workout
-
-    private lateinit var selectedHistoric: Historic
+    private var selectedWorkout: Workout? = null
     private var language = listOf("Euskara", "Español", "English")
+    private var levels = listOf("Guztiak", "1", "2", "3", "4", "5")
     private var selectedLanguageChoice: String = language[0]
+    private var selectedLevelChoice: String = levels[0]
     private var prevSelectedPosition = -1
 
 
@@ -56,7 +49,7 @@ class HomeTrainer : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             return@setOnApplyWindowInsetsListener insets
         }
-
+        orderWorkouts()
         binding.ivBacktoLogin.setOnClickListener {
             val intent = android.content.Intent(this, MainActivity::class.java)
             startActivity(intent)
@@ -126,17 +119,36 @@ class HomeTrainer : AppCompatActivity() {
                     Log.e("HomeTrainer", "Failed to load user doc uid=$uid: ${e.message}")
                 }
         }
+        binding.spOrder.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedLevelChoice = levels[position]
+                Log.d("Spinner", "Usuario seleccionó: $selectedLevelChoice")
+                if (binding.spOrder.selectedItem == "Guztiak") {
+                    loadAllWorkouts { workoutList ->
+                        initAdapter(workoutList)
+                    }
+                } else {
+                    loadAllWorkouts { workoutList ->
+                        val filteredWorkouts = workoutList.filter { it.level == selectedLevelChoice.toInt() }.toMutableList()
+                        initAdapter(filteredWorkouts)
+                    }
+                }
+            }
 
-        loadAllWorkouts { workoutList ->
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+    }
+    private fun initAdapter(workoutList: MutableList<Workout>) {
             workoutAdapter = WorkoutAdapter(workoutList) { selectedPosition ->
-                if (::selectedWorkout.isInitialized) {
-                    if (selectedWorkout.isSelected && prevSelectedPosition != -1) {
-                        selectedWorkout.isSelected = false
+                if (selectedWorkout != null) {
+                    if (selectedWorkout!!.isSelected && prevSelectedPosition != -1) {
+                        selectedWorkout!!.isSelected = false
                         workoutAdapter.notifyItemChanged(prevSelectedPosition)
                     }
                 }
                 selectedWorkout = workoutList[selectedPosition]
-                selectedWorkout.isSelected = true
+                selectedWorkout!!.isSelected = true
                 workoutAdapter.notifyItemChanged(selectedPosition)
                 prevSelectedPosition = selectedPosition
             }
@@ -148,26 +160,27 @@ class HomeTrainer : AppCompatActivity() {
                 showCreateWorkoutDialog(workoutList)
             }
             binding.btnEditWorkout.setOnClickListener {
-                if (::selectedWorkout.isInitialized) {
-                    Log.i("","Editing workout: ${selectedWorkout.id} - ${selectedWorkout.name}")
-                    showEditWorkoutDialog(workoutList, prevSelectedPosition)
+                if (selectedWorkout != null) {
+                    Log.i("","Editing workout: ${selectedWorkout!!.id} - ${selectedWorkout!!.name}")
+                    showEditWorkoutDialog(workoutList,prevSelectedPosition)
+                    workoutAdapter.notifyItemChanged(prevSelectedPosition)
                 } else {
                     Toast.makeText(this, "Selecciona un entrenamiento primero", Toast.LENGTH_SHORT).show()
                 }
             }
             binding.btnDeleteWorkout.setOnClickListener {
-                if (::selectedWorkout.isInitialized) {
-                    Log.i("","Deleting workout: ${selectedWorkout.id} - ${selectedWorkout.name}")
-                    deleteWorkout(selectedWorkout.id)
+                if (selectedWorkout != null) {
+                    Log.i("","Deleting workout: ${selectedWorkout!!.id} - ${selectedWorkout!!.name}")
+                    deleteWorkout(selectedWorkout!!.id)
                     workoutList.remove(selectedWorkout)
-                    workoutAdapter.notifyDataSetChanged()
+                    workoutAdapter.notifyItemChanged(prevSelectedPosition)
+                    selectedWorkout = null
+                    prevSelectedPosition = -1
                 } else {
                     Toast.makeText(this, "Selecciona un entrenamiento primero", Toast.LENGTH_SHORT).show()
                 }
             }
         }
-
-    }
 
     override fun onDestroy() {
         // remove any pending callbacks to avoid running after the activity is destroyed
@@ -178,7 +191,7 @@ class HomeTrainer : AppCompatActivity() {
         super.onDestroy()
     }
 
-    private fun showAllWorkouts() {
+    /*private fun showAllWorkouts() {
         // Get user lvl to filter workouts
         val db = FirebaseSingleton.db
 
@@ -196,7 +209,7 @@ class HomeTrainer : AppCompatActivity() {
             .addOnFailureListener { exception ->
                 Log.w("HomeTrainer", "Error getting workouts: ", exception)
             }
-    }
+    }*/
     private fun loadAllWorkouts(callback: (MutableList<Workout>) -> Unit) {
         // Get user lvl to filter workouts
         val db = FirebaseSingleton.db
@@ -316,6 +329,7 @@ class HomeTrainer : AppCompatActivity() {
         dialog.show()
     }
 
+
     private fun showCreateWorkoutDialog(workoutList: MutableList<Workout>) {
 
         val newWorkoutBinding = ActivityNewWorkoutBinding.inflate(layoutInflater)
@@ -331,7 +345,7 @@ class HomeTrainer : AppCompatActivity() {
             dialog.cancel()
         }
         newWorkoutBinding.btnConfirm.setOnClickListener {
-            val workout: Workout = Workout(
+            val workout = Workout(
                 "",
                 newWorkoutBinding.etTitle.text.toString(),
                 newWorkoutBinding.etDescription.text.toString(),
@@ -343,22 +357,22 @@ class HomeTrainer : AppCompatActivity() {
             addWorkoutWithExcercises(workout)
             workoutList.add(workout)
             Log.i("",workoutList.toString())
-            workoutAdapter.notifyDataSetChanged()
+            workoutAdapter.notifyItemChanged(workoutList.size-1)
             dialog.cancel()
         }
     }
-    private fun showEditWorkoutDialog(workoutList: MutableList<Workout>, selectedPosition: Int) {
+    private fun showEditWorkoutDialog(workoutList: MutableList<Workout>, position: Int) {
 
         val newWorkoutBinding = ActivityNewWorkoutBinding.inflate(layoutInflater)
 
         newWorkoutBinding.npLevel.minValue = 1
         newWorkoutBinding.npLevel.maxValue = 5
-
-        newWorkoutBinding.tvTitle.setText("Workout editatu")
-        newWorkoutBinding.etTitle.setText(selectedWorkout.name)
-        newWorkoutBinding.etDescription.setText(selectedWorkout.description)
-        newWorkoutBinding.npLevel.value = selectedWorkout.level
-        newWorkoutBinding.etVideo.setText(selectedWorkout.video)
+        val workouteditatu = "Workout editatu"
+        newWorkoutBinding.tvTitle.text = workouteditatu
+        newWorkoutBinding.etTitle.setText(selectedWorkout!!.name)
+        newWorkoutBinding.etDescription.setText(selectedWorkout!!.description)
+        newWorkoutBinding.npLevel.value = selectedWorkout!!.level
+        newWorkoutBinding.etVideo.setText(selectedWorkout!!.video)
 
 
         val dialog = Dialog(this)
@@ -369,30 +383,25 @@ class HomeTrainer : AppCompatActivity() {
             dialog.cancel()
         }
         newWorkoutBinding.btnConfirm.setOnClickListener {
-            val workoutNew: Workout = Workout(
-                selectedWorkout.id,
-                newWorkoutBinding.etTitle.text.toString(),
-                newWorkoutBinding.etDescription.text.toString(),
-                newWorkoutBinding.npLevel.value,
-                newWorkoutBinding.etVideo.text.toString(),
-                false,
-                listOf()
-            )
-            editWorkout(workoutNew)
-            workoutList[selectedPosition] = workoutNew
-            workoutAdapter.notifyDataSetChanged()
+            selectedWorkout!!.name = newWorkoutBinding.etTitle.text.toString()
+            selectedWorkout!!.description = newWorkoutBinding.etDescription.text.toString()
+            selectedWorkout!!.level = newWorkoutBinding.npLevel.value
+            selectedWorkout!!.video = newWorkoutBinding.etVideo.text.toString()
+            editWorkout(selectedWorkout!!)
+            workoutList[position] = selectedWorkout!!
+            workoutAdapter.notifyItemChanged(position)
             dialog.cancel()
         }
     }
 
     private fun isDarkModeEnabled(): Boolean {
-        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
         return prefs.getBoolean("dark_mode", false)
     }
 
     private fun setDarkMode(enabled: Boolean) {
-        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        prefs.edit().putBoolean("dark_mode", enabled).apply()
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        prefs.edit { putBoolean("dark_mode", enabled) }
 
         AppCompatDelegate.setDefaultNightMode(
             if (enabled) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
@@ -431,10 +440,10 @@ class HomeTrainer : AppCompatActivity() {
                     if (document.exists()) {
                         currentUser = document.toObject(User::class.java)
                         currentUser?.let { user ->
-                            profileBinding.editTextName.setText(user.name ?: "")
-                            profileBinding.editTextSurname.setText(user.surname ?: "")
-                            profileBinding.editTextSurname2.setText(user.surname2 ?: "")
-                            profileBinding.editTextBirthdate.setText(user.birthdate ?: "")
+                            profileBinding.editTextName.setText(user.name)
+                            profileBinding.editTextSurname.setText(user.surname)
+                            profileBinding.editTextSurname2.setText(user.surname2)
+                            profileBinding.editTextBirthdate.text = user.birthdate
                         }
                     }
                 }
@@ -474,5 +483,15 @@ class HomeTrainer : AppCompatActivity() {
             Log.d("UserProfile", "Update button clicked")
         }
     }
-
+    private fun orderWorkouts() {
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, levels)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spOrder.adapter = adapter
+        binding.spOrder.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedLevelChoice = levels[position]
+            }
+            override fun onNothingSelected(p0: AdapterView<*>?) {}
+        }
+    }
 }

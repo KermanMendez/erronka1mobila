@@ -32,6 +32,7 @@
     <string name="Client">Bezeroa</string>
     <string name="Trainer">Entrenatzailea</string>
     <string name="register_btn">Erregistratu</string>
+    <string name="logout">Atera</string>
 
     <string name="register_email_hint">email@gmail.com</string>
 

@@ -436,6 +436,12 @@ class HomeClient : AppCompatActivity() {
         settingsBinding.btnBackSettings.setOnClickListener {
             dialog.cancel()
         }
+        settingsBinding.btnLogout.setOnClickListener {
+            FirebaseSingleton.auth.signOut()
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
     }
     private fun showProfileDialog() {
 

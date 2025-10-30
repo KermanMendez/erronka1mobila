@@ -30,13 +30,19 @@
             android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:text="@string/btnLogin"
-            android:layout_marginBottom="16dp"/>
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="@color/button"
+            android:textColor="@color/black"
+            />
 
 
         <Button
             android:id="@+id/btnSignUp"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:text="@string/btnSignUp"/>
+            android:text="@string/btnSignUp"
+            android:backgroundTint="@color/button"
+            android:textColor="@color/black"
+            />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

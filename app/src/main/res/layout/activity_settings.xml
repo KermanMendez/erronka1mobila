@@ -45,7 +45,10 @@
             android:id="@+id/switchDarkMode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp" />
+            android:layout_marginHorizontal="16dp"
+            app:thumbTint="@color/white"
+            app:trackTint="@color/button"
+            />
     </LinearLayout>
 
     <LinearLayout
@@ -80,5 +83,7 @@
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginBottom="15dp"
         android:layout_marginStart="10dp"
-        android:text="@string/back"/>
+        android:text="@string/back"
+        android:backgroundTint="@color/button"
+        android:textColor="@color/black"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

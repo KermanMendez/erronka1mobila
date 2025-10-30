@@ -81,7 +81,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="@string/select_birthdate" />
+        android:text="@string/select_birthdate"
+        android:backgroundTint="@color/button"
+        android:textColor="@color/black"/>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="48dp"
@@ -95,12 +97,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
-        android:text="@string/save_changes"/>
+        android:text="@string/save_changes"
+        android:backgroundTint="@color/button"
+        android:textColor="@color/black"/>
     <Button
         android:id="@+id/btnBackProfile"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
-        android:text="@string/back"/>
+        android:text="@string/back"
+        android:backgroundTint="@color/button"
+        android:textColor="@color/black"/>
   </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

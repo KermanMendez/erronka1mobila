@@ -108,12 +108,16 @@
             android:id="@+id/btnConfirm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/confirm"/>
+            android:text="@string/confirm"
+            android:backgroundTint="@color/button"
+            android:textColor="@color/black"/>
         <Button
             android:id="@+id/btnCancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
-            android:text="@string/cancel"/>
+            android:text="@string/cancel"
+            android:backgroundTint="@color/button"
+            android:textColor="@color/black"/>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

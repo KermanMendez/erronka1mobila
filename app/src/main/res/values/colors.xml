@@ -8,4 +8,9 @@
     <color name="background_disabled">#2E3F56</color>
 
     <color name="settings_text_title">#000000</color>
+    <color name="button">#FCCF93</color>
+    <color name="title">#D4A15E</color>
+
+    <color name="cards">#AA7939</color>
+
 </resources>

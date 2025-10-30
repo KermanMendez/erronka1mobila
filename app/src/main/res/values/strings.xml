@@ -4,8 +4,8 @@
     <string name="Password">Pasahitza:</string>
     <string name="Login">Hasi saioa</string>
     <string name="logo">Logo</string>
-    <string name="dark_mode">Modo oscuro</string>
-    <string name="dark_mode_description">Activa el modo oscuro para un cambio visual</string>
+    <string name="dark_mode">Modu iluna</string>
+    <string name="dark_mode_description">Aktibatu modu iluna itxura aldatzeko</string>
     <string name="language">Hizkuntza</string>
 
     <!--Workout data-->
@@ -38,8 +38,8 @@
 
     <string name="select_birthdate">Aukeratu jaiotze data</string>
     <string name="select_birthdate_hint">Aukeratu jaiotze data</string>
-    <string name="hello">Hola</string>
-    <string name="hello_name">Hola %1$s</string>
+    <string name="hello">Kaixo</string>
+    <string name="hello_name">Kaixo %1$s</string>
     <string name="showPassword">Erakutsi</string>
     <string name="rememberMe">Gorde saioa</string>
 

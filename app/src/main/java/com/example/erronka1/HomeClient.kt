@@ -168,15 +168,10 @@ class HomeClient : AppCompatActivity() {
                     binding.rvHistorics.adapter = historicAdapter
                     binding.rvHistorics.visibility = View.VISIBLE
                 }
-
-
             }
-
             binding.rvWorkouts.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL,false)
             binding.rvWorkouts.adapter = workoutAdapter
             Log.d("", "Historics"+historicList.toString())
-
-
         }
 
 

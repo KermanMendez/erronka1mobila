@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -30,13 +31,12 @@ class HomeTrainer : AppCompatActivity() {
     private var hideRunnable: Runnable? = null
     private lateinit var workoutAdapter: WorkoutAdapter
     private lateinit var historicAdapter: HistoricAdapter
-    private var selectedWorkout: Workout? = null
+    private lateinit var selectedWorkout: Workout
 
     private lateinit var selectedHistoric: Historic
     private var language = listOf("Euskara", "Español", "English")
     private var selectedLanguageChoice: String = language[0]
-    private var up: Boolean = false
-    private var historicList = listOf<Historic>()
+    private var prevSelectedPosition = -1
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -123,36 +123,33 @@ class HomeTrainer : AppCompatActivity() {
 
         loadAllWorkouts { workoutList ->
             workoutAdapter = WorkoutAdapter(workoutList) { selectedPosition ->
-                selectedWorkout = workoutList[selectedPosition]
-                lifecycleScope.launch {
-                    historicList = loadWorkoutHistorics(selectedWorkout!!.id)
+                if (::selectedWorkout.isInitialized) {
+                    if (selectedWorkout.isSelected && prevSelectedPosition != -1) {
+                        selectedWorkout.isSelected = false
+                        workoutAdapter.notifyItemChanged(prevSelectedPosition)
+                    }
                 }
+                selectedWorkout = workoutList[selectedPosition]
+                selectedWorkout.isSelected = true
+                workoutAdapter.notifyItemChanged(selectedPosition)
+                prevSelectedPosition = selectedPosition
             }
-            binding.rvWorkouts.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL,false)
+            binding.rvWorkouts.layoutManager = LinearLayoutManager(this,
+                LinearLayoutManager.VERTICAL,false)
             binding.rvWorkouts.adapter = workoutAdapter
-
-            historicAdapter = HistoricAdapter(historicList) { selectedPosition ->
-                selectedHistoric = historicList[selectedPosition]
-            }
-            binding.rvHistorics.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false)
-            binding.rvHistorics.adapter = historicAdapter
 
             binding.btnCreateWorkout.setOnClickListener {
                 showCreateWorkoutDialog(workoutList)
                 workoutAdapter.notifyDataSetChanged()
             }
             binding.btnDeleteWorkout.setOnClickListener {
-                val workout = selectedWorkout
-                if (workout != null){
-                    deleteWorkout(workout.id)
-                    val index = workoutList.indexOf(workout)
-                    if (index != -1) {
-                        workoutList.removeAt(index)
-                        workoutAdapter.notifyItemRemoved(index)
-                    }
-                    selectedWorkout = null
+                if (::selectedWorkout.isInitialized) {
+                    Log.i("","Deleting workout: ${selectedWorkout.id} - ${selectedWorkout.name}")
+                    deleteWorkout(selectedWorkout.id)
+                    workoutList.remove(selectedWorkout)
+                    workoutAdapter.notifyDataSetChanged()
                 } else {
-                    Log.w("HomeTrainer", "No workout seleccionado para eliminar")
+                    Toast.makeText(this, "Selecciona un entrenamiento primero", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -217,6 +214,7 @@ class HomeTrainer : AppCompatActivity() {
 
         // asignamos el id generado al objeto (no se serializará por @get:Exclude)
         workout.id = docRef.id
+        Log.i("","Adding workout with generated ID: ${workout.id}, aaaaaaaaaaa: ${docRef.id}")
 
         // `ariketak` está excluido por @get:Exclude, por tanto solo se subirán los campos restantes
         batch.set(docRef, workout)

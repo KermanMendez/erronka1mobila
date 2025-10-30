@@ -1,6 +1,7 @@
 package com.example.erronka1
 
 import android.app.Dialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -10,6 +11,7 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
@@ -19,19 +21,13 @@ import com.example.erronka1.db.FirebaseSingleton
 import com.example.erronka1.databinding.ActivityHomeClientBinding
 import com.example.erronka1.databinding.ActivitySettingsBinding
 import com.example.erronka1.databinding.ActivityUserProfileBinding
-import com.example.erronka1.model.Ariketa
 import com.example.erronka1.model.Workout
 import com.example.erronka1.model.Historic
 import com.example.erronka1.model.User
 import com.example.erronka1.rvHistoric.HistoricAdapter
 import com.example.erronka1.rvWorkout.WorkoutAdapter
-import com.google.firebase.auth.userProfileChangeRequest
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import kotlin.text.get
-import kotlin.text.toInt
 
 class HomeClient : AppCompatActivity() {
 
@@ -51,6 +47,7 @@ class HomeClient : AppCompatActivity() {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        applyTheme()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = ActivityHomeClientBinding.inflate(layoutInflater)
@@ -427,6 +424,11 @@ class HomeClient : AppCompatActivity() {
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
 
+        settingsBinding.switchDarkMode.isChecked = isDarkModeEnabled()
+        settingsBinding.switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
+            setDarkMode(isChecked)
+        }
+
         val dialog = Dialog(this)
         dialog.setContentView(settingsBinding.root)
         dialog.show()
@@ -504,6 +506,27 @@ class HomeClient : AppCompatActivity() {
             updateUserProfile(profileBinding)
             Log.d("UserProfile", "Update button clicked")
         }
+    }
+
+    private fun isDarkModeEnabled(): Boolean {
+        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        return prefs.getBoolean("dark_mode", false)
+    }
+
+    private fun setDarkMode(enabled: Boolean) {
+        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("dark_mode", enabled).apply()
+
+        AppCompatDelegate.setDefaultNightMode(
+            if (enabled) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+        )
+    }
+
+    private fun applyTheme() {
+        val enabled = isDarkModeEnabled()
+        AppCompatDelegate.setDefaultNightMode(
+            if (enabled) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+        )
     }
 
 

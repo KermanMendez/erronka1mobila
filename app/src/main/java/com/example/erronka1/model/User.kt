@@ -8,6 +8,6 @@ data class User(
     var birthdate: String = "",
     var isTrainer: Boolean = false,
     var level: Int = 1,
-    // Need to se if it's necessary to initialize workouts to empty list or to be 2 separated objets
+    
 
 )

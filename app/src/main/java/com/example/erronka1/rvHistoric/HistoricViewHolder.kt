@@ -5,7 +5,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.erronka1.R
 import com.example.erronka1.model.Historic
-import com.example.erronka1.model.Workout
 
 class HistoricViewHolder (view: View) : RecyclerView.ViewHolder(view) {
 

@@ -5,7 +5,6 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.erronka1.R
 import com.example.erronka1.model.Historic
-import com.example.erronka1.model.Workout
 
 class HistoricAdapter (private val historics: List<Historic>, private val onHistoricSelected: (Int) -> Unit) :
     RecyclerView.Adapter<HistoricViewHolder>(){

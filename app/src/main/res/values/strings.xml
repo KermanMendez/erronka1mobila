@@ -30,7 +30,7 @@
     <string name="register_confirm_password">Pasahitza berretsi:</string>
     <string name="register_email">Emaila:</string>
     <string name="Client">Bezeroa</string>
-    <string name="Trainer">Entrenatzailea</string>
+    <string name="trainer">Entrenatzailea</string>
     <string name="register_btn">Erregistratu</string>
 
     <string name="register_email_hint">email@gmail.com</string>
@@ -54,5 +54,6 @@
 
     <string name="profile_edit">Perfila editatu</string>
     <string name="save_changes">Gorde aldaketak</string>
+    <string name="training">Entrenamendua</string>
 
 </resources>

@@ -1,5 +1,7 @@
 package com.example.erronka1
 
+import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -10,6 +12,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.erronka1.databinding.ActivityUserProfileBinding
 import com.example.erronka1.db.FirebaseSingleton
 import com.example.erronka1.model.User
+import java.util.Locale
 
 class UserProfile : AppCompatActivity() {
 
@@ -17,6 +20,7 @@ class UserProfile : AppCompatActivity() {
     private var currentUser: User? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        applyLanguage()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = ActivityUserProfileBinding.inflate(layoutInflater)
@@ -83,5 +87,17 @@ class UserProfile : AppCompatActivity() {
             updateUserProfile()
             Log.d("UserProfile", "Update button clicked")
         }
+    }
+    private fun applyLanguage() {
+        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val languageCode = prefs.getString("selected_language", "eu") ?: "eu"
+
+        val locale = Locale(languageCode)
+        Locale.setDefault(locale)
+
+        val config = Configuration()
+        config.setLocale(locale)
+
+        resources.updateConfiguration(config, resources.displayMetrics)
     }
 }

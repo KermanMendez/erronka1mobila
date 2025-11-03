@@ -1,6 +1,8 @@
 package com.example.erronka1
 
 import android.app.Dialog
+import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -23,6 +25,7 @@ import com.example.erronka1.model.User
 import com.example.erronka1.model.Workout
 import com.example.erronka1.rvWorkout.WorkoutAdapter
 import androidx.core.content.edit
+import java.util.Locale
 
 class HomeTrainer : AppCompatActivity() {
 
@@ -39,6 +42,7 @@ class HomeTrainer : AppCompatActivity() {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        applyLanguage()
         applyTheme()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -309,12 +313,26 @@ class HomeTrainer : AppCompatActivity() {
 
         val settingsBinding = ActivitySettingsBinding.inflate(layoutInflater)
 
+        val languageCodes = listOf("eu", "es", "en")
+
+        // Crear y asignar el adapter con los nombres de idiomas
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, language)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         settingsBinding.spLanguages.adapter = adapter
+
+        // Establecer la selección actual DESPUÉS de asignar el adapter
+        val currentIndex = getCurrentLanguageIndex()
+        settingsBinding.spLanguages.setSelection(currentIndex)
+
         settingsBinding.spLanguages.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 selectedLanguageChoice = language[position]
+                val selectedLanguageCode = languageCodes[position]
+
+                // Solo cambiar si es diferente al actual
+                if (position != currentIndex) {
+                    setLanguage(selectedLanguageCode)
+                }
             }
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
@@ -328,6 +346,7 @@ class HomeTrainer : AppCompatActivity() {
         dialog.setContentView(settingsBinding.root)
         dialog.show()
     }
+
 
 
     private fun showCreateWorkoutDialog(workoutList: MutableList<Workout>) {
@@ -492,6 +511,47 @@ class HomeTrainer : AppCompatActivity() {
                 selectedLevelChoice = levels[position]
             }
             override fun onNothingSelected(p0: AdapterView<*>?) {}
+        }
+    }
+
+    private fun setLanguage(languageCode: String) {
+        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        prefs.edit().putString("selected_language", languageCode).apply()
+
+        val locale = Locale(languageCode)
+        Locale.setDefault(locale)
+
+        val config = Configuration()
+        config.setLocale(locale)
+
+        resources.updateConfiguration(config, resources.displayMetrics)
+
+        // Reiniciar la actividad para aplicar el cambio
+        recreate()
+    }
+
+    private fun applyLanguage() {
+        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val languageCode = prefs.getString("selected_language", "eu") ?: "eu"
+
+        val locale = Locale(languageCode)
+        Locale.setDefault(locale)
+
+        val config = Configuration()
+        config.setLocale(locale)
+
+        resources.updateConfiguration(config, resources.displayMetrics)
+    }
+
+    private fun getCurrentLanguageIndex(): Int {
+        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val currentLanguage = prefs.getString("selected_language", "eu") ?: "eu"
+
+        return when (currentLanguage) {
+            "eu" -> 0  // Euskera
+            "es" -> 1  // Español
+            "en" -> 2  // English
+            else -> 0  // Fallback a euskera
         }
     }
 }

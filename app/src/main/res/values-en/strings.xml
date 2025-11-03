@@ -1,0 +1,61 @@
+<resources>
+    <string name="app_name">Long Ring Long Land Gym</string>
+    <string name="Username">Username:</string>
+    <string name="Password">Password:</string>
+    <string name="Login">Log In</string>
+    <string name="logo">Logo</string>
+    <string name="dark_mode">Dark mode</string>
+    <string name="dark_mode_description">Enable dark mode for a visual change</string>
+    <string name="language">Language</string>
+
+    <!--Workout data-->
+    <string name="workout_name">Name</string>
+    <string name="level">Level</string>
+    <string name="total_time">Total time</string>
+    <string name="expected_time">Expected time</string>
+    <string name="date">Date</string>
+    <string name="done_exercises_percent">Exercises %</string>
+    <string name="workout_video">Video</string>
+
+    <string name="btnLogin">Log In</string>
+    <string name="btnSignUp">Sign Up</string>
+    <string name="back">Back</string>
+
+    <!--Register-->
+    <string name="register_title">Register</string>
+    <string name="register_username">Username:</string>
+    <string name="register_lastname1">First Last Name:</string>
+    <string name="register_lastname2">Second Last Name:</string>
+    <string name="register_password">Password:</string>
+    <string name="register_confirm_password">Confirm Password:</string>
+    <string name="register_email">Email:</string>
+    <string name="Client">Client</string>
+    <string name="trainer">Trainer</string>
+    <string name="register_btn">Register</string>
+    <string name="logout">Log Out</string>
+    <string name="noHistoric">There is no historic data</string>
+
+    <string name="register_email_hint">email@gmail.com</string>
+
+    <string name="select_birthdate">Select birthdate</string>
+    <string name="select_birthdate_hint">Select birthdate</string>
+    <string name="hello">Hello</string>
+    <string name="hello_name">Hello %1$s</string>
+    <string name="showPassword">Show</string>
+    <string name="rememberMe">Remember me</string>
+
+    <string name="create_workout">New Workout</string>
+    <string name="edit_workout">Edit Workout</string>
+    <string name="delete_workout">Delete workout</string>
+    <string name="order_arrow">Sort</string>
+    <string name="profile">Profile</string>
+    <string name="description">Description</string>
+
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="profile_edit">Edit profile</string>
+    <string name="save_changes">Save changes</string>
+    <string name="training">Training</string>
+
+</resources>

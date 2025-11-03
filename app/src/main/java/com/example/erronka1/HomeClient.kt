@@ -1,7 +1,9 @@
 package com.example.erronka1
 
 import android.app.Dialog
+import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -28,6 +30,9 @@ import com.example.erronka1.rvWorkout.WorkoutAdapter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import androidx.core.content.edit
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.util.Locale
 
 class HomeClient : AppCompatActivity() {
 
@@ -48,6 +53,7 @@ class HomeClient : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         applyTheme()
+        applyLanguage()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = ActivityHomeClientBinding.inflate(layoutInflater)
@@ -378,6 +384,7 @@ class HomeClient : AppCompatActivity() {
                     .await()
 
                 if (!query.isEmpty) {
+                    binding.tvNoHistorics.visibility = View.GONE
                     val list = mutableListOf<Historic>()
                     for (doc in query.documents) {
                         val h = Historic(
@@ -410,6 +417,12 @@ class HomeClient : AppCompatActivity() {
                     result = list
                 } else {
                     Log.d("HomeClient", "No historic entries for workoutId=$workoutId")
+                    withContext(Dispatchers.Main) {
+                        // Oculta el RecyclerView y muestra el TextView con el mensaje
+                        binding.rvHistorics.visibility = View.GONE
+                        binding.tvNoHistorics.visibility = View.VISIBLE
+                        binding.tvNoHistorics.text = getString(R.string.noHistoric)
+                    }
                 }
             } catch (e: Exception) {
                 Log.w("HomeClient", "Error loading historic list for workoutId=$workoutId", e)
@@ -425,12 +438,26 @@ class HomeClient : AppCompatActivity() {
 
         val settingsBinding = ActivitySettingsBinding.inflate(layoutInflater)
 
+        val languageCodes = listOf("eu", "es", "en")
+
+        // Crear y asignar el adapter con los nombres de idiomas
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, language)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         settingsBinding.spLanguages.adapter = adapter
+
+        // Establecer la selección actual DESPUÉS de asignar el adapter
+        val currentIndex = getCurrentLanguageIndex()
+        settingsBinding.spLanguages.setSelection(currentIndex)
+
         settingsBinding.spLanguages.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 selectedLanguageChoice = language[position]
+                val selectedLanguageCode = languageCodes[position]
+
+                // Solo cambiar si es diferente al actual
+                if (position != currentIndex) {
+                    setLanguage(selectedLanguageCode)
+                }
             }
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
@@ -445,6 +472,12 @@ class HomeClient : AppCompatActivity() {
         dialog.show()
         settingsBinding.btnBackSettings.setOnClickListener {
             dialog.cancel()
+        }
+        settingsBinding.btnLogout.setOnClickListener {
+            FirebaseSingleton.auth.signOut()
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
         }
     }
     private fun showProfileDialog() {
@@ -548,6 +581,47 @@ class HomeClient : AppCompatActivity() {
                 selectedLevelChoice = levels[position]
             }
             override fun onNothingSelected(p0: AdapterView<*>?) {}
+        }
+    }
+
+    private fun setLanguage(languageCode: String) {
+        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        prefs.edit { putString("selected_language", languageCode) }
+
+        val locale = Locale(languageCode)
+        Locale.setDefault(locale)
+
+        val config = Configuration()
+        config.setLocale(locale)
+
+        resources.updateConfiguration(config, resources.displayMetrics)
+
+        // Reiniciar la actividad para aplicar el cambio
+        recreate()
+    }
+
+    private fun applyLanguage() {
+        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val languageCode = prefs.getString("selected_language", "eu") ?: "eu"
+
+        val locale = Locale(languageCode)
+        Locale.setDefault(locale)
+
+        val config = Configuration()
+        config.setLocale(locale)
+
+        resources.updateConfiguration(config, resources.displayMetrics)
+    }
+
+    private fun getCurrentLanguageIndex(): Int {
+        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val currentLanguage = prefs.getString("selected_language", "eu") ?: "eu"
+
+        return when (currentLanguage) {
+            "eu" -> 0  // Euskera
+            "es" -> 1  // Español
+            "en" -> 2  // English
+            else -> 0
         }
     }
 

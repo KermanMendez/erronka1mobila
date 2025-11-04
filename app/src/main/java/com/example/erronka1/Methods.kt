@@ -10,6 +10,7 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.edit
 import androidx.lifecycle.LifecycleOwner
@@ -224,7 +225,7 @@ class Methods (
     private lateinit var selectedHistoric: Historic
     private var historicList = listOf<Historic>()
     private var prevSelectedPosition = -1
-    private fun initAdapterWorkoutsAndHistorics(workoutList: MutableList<Workout>) {
+    public fun initAdapterWorkoutsAndHistorics(workoutList: MutableList<Workout>) {
         val binding = ActivityHomeClientBinding.inflate(layoutInflater())
         workoutAdapter = WorkoutAdapter(workoutList) { selectedPosition ->
             if (::selectedWorkout.isInitialized) {
@@ -238,7 +239,7 @@ class Methods (
             workoutAdapter.notifyItemChanged(selectedPosition)
             prevSelectedPosition = selectedPosition
 
-            (context as? LifecycleOwner)?.lifecycleScope?.launch {
+            (context as AppCompatActivity).lifecycleScope.launch {
                 historicList = loadWorkoutHistorics(selectedWorkout.id)
 
                 historicAdapter = HistoricAdapter(historicList) { selectedPosition ->
@@ -252,9 +253,11 @@ class Methods (
         }
         binding.rvWorkouts.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL,false)
         binding.rvWorkouts.adapter = workoutAdapter
+        binding.rvWorkouts.visibility = View.VISIBLE
         Log.d("", "Historics"+historicList.toString())
     }
-    private fun initAdapterWorkouts(workoutList: MutableList<Workout>) {
+
+    public fun initAdapterWorkouts(workoutList: MutableList<Workout>) {
         val binding = ActivityHomeTrainerBinding.inflate(layoutInflater())
         workoutAdapter = WorkoutAdapter(workoutList) { selectedPosition ->
             if (::selectedWorkout.isInitialized) {

@@ -40,11 +40,18 @@ class HomeClient : AppCompatActivity() {
     private var selectedLevelChoice: String = levels[0]
     private var historicList = listOf<Historic>()
     private var prevSelectedPosition = -1
+    private lateinit var methods: Methods
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Methods(this){}.applyLanguage()
-        Methods(this){}.applyTheme()
+        methods = Methods(this) {
+            // Qué pasa al cerrar sesión
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+        methods.applyLanguage()
+        methods.applyTheme()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = ActivityHomeClientBinding.inflate(layoutInflater)
@@ -129,15 +136,11 @@ class HomeClient : AppCompatActivity() {
         }
 
         binding.ivProfile.setOnClickListener {
-            Methods(this) {}.showProfileDialog()
+            methods.showProfileDialog()
         }
 
         binding.ivSettings.setOnClickListener {
-            Methods(this) {
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
-                finish()
-            }.showSettingsDialog()
+            methods.showSettingsDialog()
         }
 
 
@@ -148,7 +151,7 @@ class HomeClient : AppCompatActivity() {
                 Log.d("Spinner", "Usuario seleccionó: $selectedLevelChoice")
                 if (binding.spOrder.selectedItem == "Guztiak") {
                      loadAllWorkouts { workoutList ->
-                        initAdapter(workoutList)
+                         initAdapter(workoutList)
                     }
                 } else {
                     loadAllWorkouts { workoutList ->

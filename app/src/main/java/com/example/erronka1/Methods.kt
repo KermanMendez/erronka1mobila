@@ -225,8 +225,7 @@ class Methods (
     private lateinit var selectedHistoric: Historic
     private var historicList = listOf<Historic>()
     private var prevSelectedPosition = -1
-    public fun initAdapterWorkoutsAndHistorics(workoutList: MutableList<Workout>) {
-        val binding = ActivityHomeClientBinding.inflate(layoutInflater())
+    public fun initAdapterWorkoutsAndHistorics(workoutList: MutableList<Workout>, binding: ActivityHomeClientBinding) {
         workoutAdapter = WorkoutAdapter(workoutList) { selectedPosition ->
             if (::selectedWorkout.isInitialized) {
                 if (selectedWorkout.isSelected && prevSelectedPosition != -1) {
@@ -257,8 +256,7 @@ class Methods (
         Log.d("", "Historics"+historicList.toString())
     }
 
-    public fun initAdapterWorkouts(workoutList: MutableList<Workout>) {
-        val binding = ActivityHomeTrainerBinding.inflate(layoutInflater())
+    public fun initAdapterWorkouts(workoutList: MutableList<Workout>, binding: ActivityHomeTrainerBinding) {
         workoutAdapter = WorkoutAdapter(workoutList) { selectedPosition ->
             if (::selectedWorkout.isInitialized) {
                 if (selectedWorkout.isSelected && prevSelectedPosition != -1) {

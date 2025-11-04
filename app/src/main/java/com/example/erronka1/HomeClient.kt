@@ -151,7 +151,7 @@ class HomeClient : AppCompatActivity() {
                 Log.d("Spinner", "Usuario seleccionó: $selectedLevelChoice")
                 if (binding.spOrder.selectedItem == "Guztiak") {
                      loadAllWorkouts { workoutList ->
-                         initAdapter(workoutList)
+                         methods.initAdapterWorkoutsAndHistorics(workoutList,binding)
                     }
                 } else {
                     loadAllWorkouts { workoutList ->

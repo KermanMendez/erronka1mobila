@@ -1,9 +1,6 @@
 package com.example.erronka1
 
-import android.app.Dialog
-import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -12,7 +9,6 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
@@ -20,7 +16,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.erronka1.db.FirebaseSingleton
 import com.example.erronka1.databinding.ActivityHomeClientBinding
-import com.example.erronka1.databinding.ActivitySettingsBinding
 import com.example.erronka1.databinding.ActivityUserProfileBinding
 import com.example.erronka1.model.Workout
 import com.example.erronka1.model.Historic
@@ -29,10 +24,8 @@ import com.example.erronka1.rvHistoric.HistoricAdapter
 import com.example.erronka1.rvWorkout.WorkoutAdapter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import androidx.core.content.edit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.util.Locale
 
 class HomeClient : AppCompatActivity() {
 
@@ -43,17 +36,15 @@ class HomeClient : AppCompatActivity() {
     private lateinit var historicAdapter: HistoricAdapter
     private lateinit var selectedWorkout: Workout
     private lateinit var selectedHistoric: Historic
-    private var language = listOf("Euskara", "Español", "English")
     private var levels = listOf("Guztiak", "1", "2", "3", "4", "5")
-    private var selectedLanguageChoice: String = language[0]
     private var selectedLevelChoice: String = levels[0]
     private var historicList = listOf<Historic>()
     private var prevSelectedPosition = -1
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        applyTheme()
-        applyLanguage()
+        Methods(this){}.applyLanguage()
+        Methods(this){}.applyTheme()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = ActivityHomeClientBinding.inflate(layoutInflater)
@@ -138,11 +129,15 @@ class HomeClient : AppCompatActivity() {
         }
 
         binding.ivProfile.setOnClickListener {
-            showProfileDialog()
+            Methods(this) {}.showProfileDialog()
         }
 
         binding.ivSettings.setOnClickListener {
-            showSettingsDialog()
+            Methods(this) {
+                val intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)
+                finish()
+            }.showSettingsDialog()
         }
 
 
@@ -152,7 +147,7 @@ class HomeClient : AppCompatActivity() {
                 selectedLevelChoice = levels[position]
                 Log.d("Spinner", "Usuario seleccionó: $selectedLevelChoice")
                 if (binding.spOrder.selectedItem == "Guztiak") {
-                    loadAllWorkouts { workoutList ->
+                     loadAllWorkouts { workoutList ->
                         initAdapter(workoutList)
                     }
                 } else {
@@ -204,70 +199,7 @@ class HomeClient : AppCompatActivity() {
         super.onDestroy()
     }
 
-    /*private fun setupRecyclerView() {
-        workoutAdapter = WorkoutAdapter(workoutsList) { position ->
-            // Handle workout selection - you can add navigation to workout detail here
-            val selectedWorkout = workoutsList[position]
-            Log.d("HomeClient", "Workout selected: ${selectedWorkout.title}")
-            // TODO: Navigate to workout detail or start workout activity
-        }
 
-        binding.rvWorkouts.apply {
-            layoutManager = LinearLayoutManager(this@HomeClient)
-            adapter = workoutAdapter
-        }
-    }*/
-
-    /*private fun showWorkouts() {
-        // Get user lvl to filter workouts
-        val uid = FirebaseSingleton.auth.currentUser?.uid ?: return
-        val db = FirebaseSingleton.db
-
-        // Primero obtenemos el nivel del usuario
-        db.collection("users").document(uid).get()
-            .addOnSuccessListener { userDoc ->
-                val userLevel = userDoc.getLong("level")?.toInt() ?: 1 // nivel por defecto 1
-
-                db.collection("workouts")
-                    .get()
-                    .addOnSuccessListener { result ->
-                        workoutsList.clear()
-
-                        for (document in result) {
-                            val workout = document.toObject(Workout::class.java)
-                            workout.id = document.id
-
-                            // Filtrar por nivel: mostrar workouts del mismo nivel o menor
-                            if (workout.level <= userLevel) {
-                                workoutsList.add(workout)
-                                Log.d("HomeClient", "Workout loaded: ${document.id} -> $workout")
-                            }
-                        }
-
-                        // Update UI
-                        if (workoutsList.isEmpty()) {
-                            binding.rvTableWorkouts.visibility = View.GONE
-                            binding.tvNoWorkouts.visibility = View.VISIBLE
-                        } else {
-                            binding.rvTableWorkouts.visibility = View.VISIBLE
-                            binding.tvNoWorkouts.visibility = View.GONE
-                            workoutAdapter.notifyItemRangeInserted(0, workoutsList.size)
-                        }
-
-                        Log.d("HomeClient", "Filtered workouts size = ${workoutsList.size} for user level $userLevel")
-                    }
-                    .addOnFailureListener { exception ->
-                        Log.w("HomeClient", "Error getting workouts: ", exception)
-                        binding.rvWorkouts.visibility = View.GONE
-                        binding.tvNoWorkouts.visibility = View.VISIBLE
-                    }
-            }
-            .addOnFailureListener { exception ->
-                Log.w("HomeClient", "Error getting user level: ", exception)
-                binding.rvWorkouts.visibility = View.GONE
-                binding.tvNoWorkouts.visibility = View.VISIBLE
-            }
-    }*/
     private fun loadAllWorkouts(callback: (MutableList<Workout>) -> Unit) {
         // Get user lvl to filter workouts
         val db = FirebaseSingleton.db
@@ -293,81 +225,6 @@ class HomeClient : AppCompatActivity() {
                 callback(mutableListOf())
             }
     }
-
-    /*private fun showUserHistoric(onComplete: (List<Historic>) -> Unit = {}) {
-        val uid = FirebaseSingleton.auth.currentUser?.uid ?: return
-        val db = FirebaseSingleton.db
-
-        val historyList = mutableListOf<Historic>()
-
-        // Order by the string `date` field (newest first). `date` is stored as String per requirement.
-        db.collection("users").document(uid).collection("historic")
-            .orderBy("date", com.google.firebase.firestore.Query.Direction.DESCENDING)
-            .get()
-            .addOnSuccessListener { querySnapshot ->
-                if (querySnapshot.isEmpty) {
-                    Log.d("HomeClient", "No hay histórico para el usuario")
-                    onComplete(historyList)
-                    return@addOnSuccessListener
-                }
-
-                var pending = querySnapshot.size()
-
-                for (doc in querySnapshot) {
-                    val id = doc.id
-                    val workoutId = doc.getString("workoutId") ?: ""
-                    val date = doc.getString("date") ?: ""
-                    val totalTime = doc.getLong("totalTime")?.toInt() ?: 0
-                    val totalReps = doc.getLong("totalReps")?.toInt() ?: 0
-                    val completed = doc.getBoolean("completed") ?: false
-
-                    val history = Historic(
-                        id = id,
-                        workoutId = workoutId,
-                        workoutTitle = "",
-                        date = date,
-                        totalTime = totalTime,
-                        totalReps = totalReps,
-                        completed = completed
-                    )
-
-                    if (workoutId.isBlank()) {
-                        history.workoutTitle = "Workout desconocido"
-                        historyList.add(history)
-                        pending--
-                        if (pending == 0) {
-                            Log.d("HomeClient", "Total histórico cargado: ${historyList.size}")
-                            onComplete(historyList)
-                        }
-                        continue
-                    }
-
-                    db.collection("workouts").document(workoutId).get()
-                        .addOnSuccessListener { workoutDoc ->
-                            val title = workoutDoc.getString("name") ?: "Workout desconocido"
-                            history.workoutTitle = title
-                            historyList.add(history)
-                        }
-                        .addOnFailureListener { e ->
-                            Log.w("HomeClient", "Error obteniendo workout title para histórico", e)
-                            history.workoutTitle = "Workout desconocido"
-                            historyList.add(history)
-                        }
-                        .addOnCompleteListener {
-                            pending--
-                            if (pending == 0) {
-                                Log.d("HomeClient", "Total histórico cargado: ${historyList.size}")
-                                onComplete(historyList)
-                                // TODO: actualizar UI con historyList
-                            }
-                        }
-                }
-            }
-            .addOnFailureListener { exception ->
-                Log.w("HomeClient", "Error obteniendo histórico del usuario: ", exception)
-                onComplete(historyList)
-            }
-    }*/
 
     private suspend fun loadWorkoutHistorics(workoutId: String): List<Historic> {
         var result: List<Historic> = emptyList()
@@ -434,68 +291,6 @@ class HomeClient : AppCompatActivity() {
         return result
     }
 
-    private fun showSettingsDialog() {
-
-        val settingsBinding = ActivitySettingsBinding.inflate(layoutInflater)
-
-        val languageCodes = listOf("eu", "es", "en")
-
-        // Crear y asignar el adapter con los nombres de idiomas
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, language)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        settingsBinding.spLanguages.adapter = adapter
-
-        // Establecer la selección actual DESPUÉS de asignar el adapter
-        val currentIndex = getCurrentLanguageIndex()
-        settingsBinding.spLanguages.setSelection(currentIndex)
-
-        settingsBinding.spLanguages.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                selectedLanguageChoice = language[position]
-                val selectedLanguageCode = languageCodes[position]
-
-                // Solo cambiar si es diferente al actual
-                if (position != currentIndex) {
-                    setLanguage(selectedLanguageCode)
-                }
-            }
-            override fun onNothingSelected(p0: AdapterView<*>?) {}
-        }
-
-        settingsBinding.switchDarkMode.isChecked = isDarkModeEnabled()
-        settingsBinding.switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
-            setDarkMode(isChecked)
-        }
-
-        val dialog = Dialog(this)
-        dialog.setContentView(settingsBinding.root)
-        dialog.show()
-        settingsBinding.btnBackSettings.setOnClickListener {
-            dialog.cancel()
-        }
-        settingsBinding.btnLogout.setOnClickListener {
-            FirebaseSingleton.auth.signOut()
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-            finish()
-        }
-    }
-    private fun showProfileDialog() {
-
-        val profileBinding = ActivityUserProfileBinding.inflate(layoutInflater)
-
-        loadUserData(profileBinding)
-        setupUpdateButton(profileBinding)
-
-
-        val dialog = Dialog(this)
-        dialog.setContentView(profileBinding.root)
-        dialog.window!!.setLayout(1000, 1500)
-        dialog.show()
-        profileBinding.btnBackProfile.setOnClickListener {
-            dialog.cancel()
-        }
-    }
 
     private fun loadUserData(profileBinding: ActivityUserProfileBinding) {
         val authUser = FirebaseSingleton.auth.currentUser
@@ -552,26 +347,6 @@ class HomeClient : AppCompatActivity() {
         }
     }
 
-    private fun isDarkModeEnabled(): Boolean {
-        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
-        return prefs.getBoolean("dark_mode", false)
-    }
-
-    private fun setDarkMode(enabled: Boolean) {
-        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
-        prefs.edit { putBoolean("dark_mode", enabled) }
-
-        AppCompatDelegate.setDefaultNightMode(
-            if (enabled) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
-        )
-    }
-
-    private fun applyTheme() {
-        val enabled = isDarkModeEnabled()
-        AppCompatDelegate.setDefaultNightMode(
-            if (enabled) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
-        )
-    }
     private fun orderWorkouts() {
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, levels)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -581,47 +356,6 @@ class HomeClient : AppCompatActivity() {
                 selectedLevelChoice = levels[position]
             }
             override fun onNothingSelected(p0: AdapterView<*>?) {}
-        }
-    }
-
-    private fun setLanguage(languageCode: String) {
-        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        prefs.edit { putString("selected_language", languageCode) }
-
-        val locale = Locale(languageCode)
-        Locale.setDefault(locale)
-
-        val config = Configuration()
-        config.setLocale(locale)
-
-        resources.updateConfiguration(config, resources.displayMetrics)
-
-        // Reiniciar la actividad para aplicar el cambio
-        recreate()
-    }
-
-    private fun applyLanguage() {
-        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val languageCode = prefs.getString("selected_language", "eu") ?: "eu"
-
-        val locale = Locale(languageCode)
-        Locale.setDefault(locale)
-
-        val config = Configuration()
-        config.setLocale(locale)
-
-        resources.updateConfiguration(config, resources.displayMetrics)
-    }
-
-    private fun getCurrentLanguageIndex(): Int {
-        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val currentLanguage = prefs.getString("selected_language", "eu") ?: "eu"
-
-        return when (currentLanguage) {
-            "eu" -> 0  // Euskera
-            "es" -> 1  // Español
-            "en" -> 2  // English
-            else -> 0
         }
     }
 

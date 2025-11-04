@@ -2,6 +2,7 @@ package com.example.erronka1
 
 import android.app.Dialog
 import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
@@ -36,14 +37,13 @@ class HomeTrainer : AppCompatActivity() {
     private var selectedWorkout: Workout? = null
     private var language = listOf("Euskara", "Español", "English")
     private var levels = listOf("Guztiak", "1", "2", "3", "4", "5")
-    private var selectedLanguageChoice: String = language[0]
     private var selectedLevelChoice: String = levels[0]
     private var prevSelectedPosition = -1
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        applyLanguage()
-        applyTheme()
+        Methods(this){}.applyLanguage()
+        Methods(this){}.applyTheme()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = ActivityHomeTrainerBinding.inflate(layoutInflater)
@@ -61,11 +61,15 @@ class HomeTrainer : AppCompatActivity() {
         }
 
         binding.ivSettings.setOnClickListener {
-            showUserSettingsDialog()
+            Methods(this) {
+                val intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)
+                finish()
+            }.showSettingsDialog()
         }
 
         binding.ivProfile.setOnClickListener {
-            showProfileDialog()
+            Methods(this){}.showProfileDialog()
         }
 
 
@@ -195,25 +199,6 @@ class HomeTrainer : AppCompatActivity() {
         super.onDestroy()
     }
 
-    /*private fun showAllWorkouts() {
-        // Get user lvl to filter workouts
-        val db = FirebaseSingleton.db
-
-        val workoutsMap = mutableMapOf<String, Workout>()
-        db.collection("workouts")
-            .get()
-            .addOnSuccessListener { result ->
-                for (document in result) {
-                    val workout = document.toObject(Workout::class.java)
-                    workoutsMap[document.id] = workout
-                    Log.d("HomeTrainer", "Workout loaded: ${document.id} ->) $workout")
-                }
-                Log.d("HomeTrainer", "Workout size = ${workoutsMap.size} ")
-            }
-            .addOnFailureListener { exception ->
-                Log.w("HomeTrainer", "Error getting workouts: ", exception)
-            }
-    }*/
     private fun loadAllWorkouts(callback: (MutableList<Workout>) -> Unit) {
         // Get user lvl to filter workouts
         val db = FirebaseSingleton.db
@@ -309,46 +294,6 @@ class HomeTrainer : AppCompatActivity() {
             }
     }
 
-    private fun showUserSettingsDialog() {
-
-        val settingsBinding = ActivitySettingsBinding.inflate(layoutInflater)
-
-        val languageCodes = listOf("eu", "es", "en")
-
-        // Crear y asignar el adapter con los nombres de idiomas
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, language)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        settingsBinding.spLanguages.adapter = adapter
-
-        // Establecer la selección actual DESPUÉS de asignar el adapter
-        val currentIndex = getCurrentLanguageIndex()
-        settingsBinding.spLanguages.setSelection(currentIndex)
-
-        settingsBinding.spLanguages.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                selectedLanguageChoice = language[position]
-                val selectedLanguageCode = languageCodes[position]
-
-                // Solo cambiar si es diferente al actual
-                if (position != currentIndex) {
-                    setLanguage(selectedLanguageCode)
-                }
-            }
-            override fun onNothingSelected(p0: AdapterView<*>?) {}
-        }
-
-        settingsBinding.switchDarkMode.isChecked = isDarkModeEnabled()
-        settingsBinding.switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
-            setDarkMode(isChecked)
-        }
-
-        val dialog = Dialog(this)
-        dialog.setContentView(settingsBinding.root)
-        dialog.show()
-    }
-
-
-
     private fun showCreateWorkoutDialog(workoutList: MutableList<Workout>) {
 
         val newWorkoutBinding = ActivityNewWorkoutBinding.inflate(layoutInflater)
@@ -413,26 +358,6 @@ class HomeTrainer : AppCompatActivity() {
         }
     }
 
-    private fun isDarkModeEnabled(): Boolean {
-        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
-        return prefs.getBoolean("dark_mode", false)
-    }
-
-    private fun setDarkMode(enabled: Boolean) {
-        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
-        prefs.edit { putBoolean("dark_mode", enabled) }
-
-        AppCompatDelegate.setDefaultNightMode(
-            if (enabled) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
-        )
-    }
-
-    private fun applyTheme() {
-        val enabled = isDarkModeEnabled()
-        AppCompatDelegate.setDefaultNightMode(
-            if (enabled) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
-        )
-    }
     private fun showProfileDialog() {
 
         val profileBinding = ActivityUserProfileBinding.inflate(layoutInflater)
@@ -514,44 +439,4 @@ class HomeTrainer : AppCompatActivity() {
         }
     }
 
-    private fun setLanguage(languageCode: String) {
-        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        prefs.edit().putString("selected_language", languageCode).apply()
-
-        val locale = Locale(languageCode)
-        Locale.setDefault(locale)
-
-        val config = Configuration()
-        config.setLocale(locale)
-
-        resources.updateConfiguration(config, resources.displayMetrics)
-
-        // Reiniciar la actividad para aplicar el cambio
-        recreate()
-    }
-
-    private fun applyLanguage() {
-        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val languageCode = prefs.getString("selected_language", "eu") ?: "eu"
-
-        val locale = Locale(languageCode)
-        Locale.setDefault(locale)
-
-        val config = Configuration()
-        config.setLocale(locale)
-
-        resources.updateConfiguration(config, resources.displayMetrics)
-    }
-
-    private fun getCurrentLanguageIndex(): Int {
-        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val currentLanguage = prefs.getString("selected_language", "eu") ?: "eu"
-
-        return when (currentLanguage) {
-            "eu" -> 0  // Euskera
-            "es" -> 1  // Español
-            "en" -> 2  // English
-            else -> 0  // Fallback a euskera
-        }
-    }
 }

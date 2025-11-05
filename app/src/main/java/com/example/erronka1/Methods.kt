@@ -40,12 +40,12 @@ class Methods (
 
         val binding = ActivitySettingsBinding.inflate(layoutInflater())
 
-        // Crear y asignar el adapter con los nombres de idiomas
+        // Adapter hizkuntzekin
         val adapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, language)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spLanguages.adapter = adapter
 
-        // Establecer la selección actual DESPUÉS de asignar el adapter
+        // Aukera dagoen hizkuntza hautatuta jartzea
         val currentIndex = getCurrentLanguageIndex()
         binding.spLanguages.setSelection(currentIndex)
 
@@ -53,7 +53,7 @@ class Methods (
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val selectedLanguageCode = languageCodes[position]
 
-                // Solo cambiar si es diferente al actual
+                // Bakarrik aldatu hizkuntza erabiltzaileak hautatutako hizkuntza desberdina bada
                 if (position != currentIndex) {
                     setLanguage(selectedLanguageCode)
                 }
@@ -87,16 +87,6 @@ class Methods (
         prefs.edit { putString("selected_language", languageCode) }
 
         (context as? android.app.Activity)?.recreate()
-        /*val locale = Locale(languageCode)
-        Locale.setDefault(locale)
-
-        val config = Configuration()
-        config.setLocale(locale)
-
-        context.resources.updateConfiguration(config, context.resources.displayMetrics)
-
-        // Reiniciar la actividad para aplicar el cambio
-        recreate()*/
     }
     private fun getCurrentLanguageIndex(): Int {
         val prefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
@@ -181,7 +171,7 @@ class Methods (
                     }
                 }
                 .addOnFailureListener { e ->
-                    Toast.makeText(context, "Error loading profile: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Errorea profila kargatzen: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
         }
     }
@@ -202,10 +192,10 @@ class Methods (
                 FirebaseSingleton.db.collection("users").document(authUser.uid)
                     .set(user)
                     .addOnSuccessListener {
-                        Toast.makeText(context, "Profile updated successfully", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Profila ondo eguneratuta", Toast.LENGTH_SHORT).show()
                     }
                     .addOnFailureListener { e ->
-                        Toast.makeText(context, "Error updating profile: ${e.message}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Errorea profila eguneratzen: ${e.message}", Toast.LENGTH_SHORT).show()
                     }
             }
         }
@@ -213,7 +203,6 @@ class Methods (
     private fun setupUpdateButton(profileBinding: ActivityUserProfileBinding) {
         profileBinding.btnSaveChanges.setOnClickListener {
             updateUserProfile(profileBinding)
-            Log.d("UserProfile", "Update button clicked")
         }
     }
 
@@ -239,12 +228,12 @@ class Methods (
             prevSelectedPosition = selectedPosition
 
             (context as AppCompatActivity).lifecycleScope.launch {
-                // AQUÍ es donde debes poner la línea que mencionas:
+
                 historicList = loadWorkoutHistorics(selectedWorkout.id, binding)
 
                 historicAdapter = HistoricAdapter(historicList) { selectedPosition ->
                     selectedHistoric = historicList[selectedPosition]
-                    Log.d("", "Selected historic: $selectedHistoric")
+                    Log.d("", "Historikoa aukeratuta: $selectedHistoric")
                 }
                 binding.rvHistorics.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL,false)
                 binding.rvHistorics.adapter = historicAdapter
@@ -298,7 +287,7 @@ class Methods (
                         val h = Historic(
                             id = doc.id,
                             workoutId = doc.getString("workoutId") ?: "",
-                            workoutTitle = "", // Se establecerá después
+                            workoutTitle = "",
                             date = doc.getString("date") ?: "",
                             totalTime = doc.getLong("totalTime")?.toInt() ?: 0,
                             totalReps = doc.getLong("totalReps")?.toInt() ?: 0,
@@ -307,31 +296,31 @@ class Methods (
                         list.add(h)
                     }
 
-                    // Cargar el título del workout
+                    // Workout izena lortu eta historico guztietan ezarri
                     if (workoutId.isNotBlank()) {
                         try {
                             val workoutDoc = db.collection("workouts").document(workoutId).get().await()
                             val title = workoutDoc.getString("name")
                                 ?: workoutDoc.getString("title")
-                                ?: "Workout desconocido"
+                                ?: "Workout ezezaguna"
                             for (h in list) {
                                 h.workoutTitle = title
                             }
                         } catch (e: Exception) {
-                            Log.w("Methods", "Failed to load workout title for $workoutId", e)
+                            Log.w("Methods", "Workout-aren tituloa ez da ondo kargatu: $workoutId", e)
                             for (h in list) {
-                                h.workoutTitle = "Workout desconocido"
+                                h.workoutTitle = "Workout ezezaguna"
                             }
                         }
                     } else {
                         for (h in list) {
-                            h.workoutTitle = "Workout desconocido"
+                            h.workoutTitle = "Workout ezezaguna"
                         }
                     }
 
                     result = list
                 } else {
-                    Log.d("Methods", "No historic entries for workoutId=$workoutId")
+                    Log.d("Methods", "Historikorik ez workout-erako=$workoutId")
                     withContext(Dispatchers.Main) {
                         binding.rvHistorics.visibility = View.GONE
                         binding.tvNoHistorics.visibility = View.VISIBLE
@@ -339,7 +328,7 @@ class Methods (
                     }
                 }
             } catch (e: Exception) {
-                Log.w("Methods", "Error loading historic list for workoutId=$workoutId", e)
+                Log.w("Methods", "Errorea historikoak kargatzen=$workoutId", e)
             }
         }
 

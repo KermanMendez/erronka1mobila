@@ -1,10 +1,6 @@
 package com.example.erronka1.rvWorkout
 
-import android.content.res.ColorStateList
-import android.graphics.Paint
 import android.view.View
-import android.widget.CheckBox
-import android.widget.RadioButton
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat

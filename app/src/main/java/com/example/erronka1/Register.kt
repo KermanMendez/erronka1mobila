@@ -27,11 +27,10 @@ class Register : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        // Ensure Firebase SDK is initialized for Firestore auth calls
         try {
             FirebaseApp.initializeApp(this)
         } catch (e: Exception) {
-            Log.w("Register", "FirebaseApp.initializeApp threw: ${e.message}")
+            Log.w("Register", "FirebaseApp.initializeApp botatzen du: ${e.message}")
         }
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -78,7 +77,7 @@ class Register : AppCompatActivity() {
             val etBirthdate = binding.tvBirthdate.text.toString().trim()
             val rbTrainer = binding.rbTrainer.isChecked
 
-            // Validaciones básicas
+            // Balioztatu sarrera eremuak
             if (etEmail.isEmpty() || etPassword.isEmpty()) {
                 Toast.makeText(this, "Email eta pasahitza bete behar dira", Toast.LENGTH_LONG).show()
                 return@setOnClickListener
@@ -88,21 +87,19 @@ class Register : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Crear usuario con email (no con username)
             FirebaseSingleton.auth.createUserWithEmailAndPassword(etEmail, etPassword)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
 
-                        // Obtener UID del usuario creado; prefer the task result then fallback to currentUser
+                        // Erabiltzailearen UID lortu
                         val uid = task.result?.user?.uid ?: FirebaseAuth.getInstance().currentUser?.uid
 
                         if (uid == null) {
-                            Toast.makeText(this, "Usuario creado baina UID hutsa", Toast.LENGTH_LONG).show()
+                            Toast.makeText(this, "Erabiltzailea sortuta baina UID hutsa", Toast.LENGTH_LONG).show()
                             return@addOnCompleteListener
                         }
 
                         val user = User(
-                            // TODO: Excluir el uid al insertar un usuario
                             uid,
                             etUsername,
                             etLastname1,
@@ -112,7 +109,7 @@ class Register : AppCompatActivity() {
 
                             )
 
-                        // Guardar en Firestore en collection 'users' con documento = uid (usa FirebaseSingleton.db)
+                        // firestore-ra gorde erabiltzailearen datuak
                         val db = FirebaseSingleton.db
                         db.collection("users")
                             .document(uid)
@@ -126,15 +123,14 @@ class Register : AppCompatActivity() {
                                     .addOnFailureListener { e ->
                                         Log.e("Register", "Firestore readback failed: ${e.message}")
                                     }
-                                Toast.makeText(this, "Usuario registrado", Toast.LENGTH_LONG).show()
+                                Toast.makeText(this, "Erabiltzailea erregistratua", Toast.LENGTH_LONG).show()
                                 val intent = Intent(this, HomeClient::class.java)
                                 startActivity(intent)
                             }
                             .addOnFailureListener { e ->
-                                // If it's a FirestoreException, check the code for permission issues
                                 if (e is FirebaseFirestoreException) {
                                     if (e.code == FirebaseFirestoreException.Code.PERMISSION_DENIED) {
-                                        Toast.makeText(this, "Firestore PERMISSION_DENIED: comprueba las reglas de seguridad en la consola de Firebase", Toast.LENGTH_LONG).show()
+                                        Toast.makeText(this, "Firestore PERMISSION_DENIED: konprobatu permisoak", Toast.LENGTH_LONG).show()
                                     } else {
                                         Toast.makeText(this, "Errorea erabiltzaileen datuak gordetzean: ${e.message}", Toast.LENGTH_LONG).show()
                                     }
@@ -143,7 +139,6 @@ class Register : AppCompatActivity() {
                                 }
                             }
                     } else {
-                        //Mostrar error
                         task.exception?.message?.let { message ->
                             Toast.makeText(this, "Errorea erabiltzailea sortzean: $message", Toast.LENGTH_LONG)
                                 .show()

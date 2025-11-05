@@ -29,14 +29,8 @@ class Login : AppCompatActivity() {
         }
         checkCurrentUserAndRedirect()
         initListeners()
-
-
     }
 
-
-    private fun logOutCurrentUser() {
-        FirebaseSingleton.auth.signOut()
-    }
     private fun checkCurrentUserAndRedirect() {
         val currentUser = FirebaseSingleton.auth.currentUser
         if (currentUser != null) {
@@ -61,10 +55,10 @@ class Login : AppCompatActivity() {
             FirebaseSingleton.auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        // Obtener el UID del usuario autenticado
+                        // Login egindako erabiltzailearen UID lortu
                         val uid = FirebaseSingleton.auth.currentUser?.uid ?: return@addOnCompleteListener
 
-                        // Consultar Firestore para obtener los datos del usuario
+                        // Firestore kontsulta egin erabiltzailearen datuak lortzeko
                         FirebaseSingleton.db.collection("users").document(uid).get()
                             .addOnSuccessListener { document ->
                                 if (document.exists()) {
@@ -81,11 +75,11 @@ class Login : AppCompatActivity() {
                                     }
                                     Toast.makeText(this, "Ongi etorri!", Toast.LENGTH_LONG).show()
                                 } else {
-                                    Toast.makeText(this, "Error: Usuario no encontrado en la base de datos", Toast.LENGTH_LONG).show()
+                                    Toast.makeText(this, "Error: Erabiltzailea ez da aurkitzen", Toast.LENGTH_LONG).show()
                                 }
                             }
                             .addOnFailureListener { exception ->
-                                Toast.makeText(this, "Error obteniendo datos del usuario: ${exception.message}", Toast.LENGTH_LONG).show()
+                                Toast.makeText(this, "Errorea erabiltzailearen datuak eskuratzen: ${exception.message}", Toast.LENGTH_LONG).show()
                             }
                     } else {
                         task.exception?.message?.let { message ->
@@ -98,7 +92,7 @@ class Login : AppCompatActivity() {
                     }
                 }
             }
-        
+
         binding.btnBack.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
@@ -106,13 +100,13 @@ class Login : AppCompatActivity() {
 
         binding.showPassword.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                // Mostrar texto de la contraseña
+                // Erakutsi pasahitzaren testua
                 binding.password.transformationMethod = HideReturnsTransformationMethod.getInstance()
             } else {
-                // Ocultar texto de la contraseña (mostrar asteriscos)
+                // Izkutatu pasahitzaren testua
                 binding.password.transformationMethod = PasswordTransformationMethod.getInstance()
             }
-            // Mantener el cursor al final del texto después de cambiar la transformación
+            // Kurtsorea pasahitzaren amaieran jarri
             val length = binding.password.text?.length ?: 0
             binding.password.setSelection(length)
         }

@@ -1,6 +1,5 @@
 package com.example.erronka1
 
-import android.content.Context
 import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
@@ -29,9 +28,6 @@ class MainActivity : AppCompatActivity() {
 
         initListeners()
         //initBackup()
-
-
-
     }
 
     private fun initListeners() {
@@ -118,8 +114,9 @@ class MainActivity : AppCompatActivity() {
         }
     }*/
 
+    @Suppress("DEPRECATION")
     private fun applyLanguage() {
-        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
         val languageCode = prefs.getString("selected_language", "eu") ?: "eu"
 
         val locale = Locale(languageCode)

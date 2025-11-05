@@ -16,9 +16,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.erronka1.databinding.ActivityHomeTrainerBinding
 import com.example.erronka1.databinding.ActivityNewWorkoutBinding
-import com.example.erronka1.databinding.ActivityUserProfileBinding
 import com.example.erronka1.db.FirebaseSingleton
-import com.example.erronka1.model.User
 import com.example.erronka1.model.Workout
 import com.example.erronka1.rvWorkout.WorkoutAdapter
 
@@ -26,10 +24,9 @@ class HomeTrainer : AppCompatActivity() {
 
     private lateinit var binding : ActivityHomeTrainerBinding
     private var hideRunnable: Runnable? = null
-    private var currentUser: User? = null
+
     private lateinit var workoutAdapter: WorkoutAdapter
     private var selectedWorkout: Workout? = null
-    private var language = listOf("Euskara", "Español", "English")
     private var levels = listOf("Guztiak", "1", "2", "3", "4", "5")
     private var selectedLevelChoice: String = levels[0]
     private var prevSelectedPosition = -1
@@ -67,7 +64,7 @@ class HomeTrainer : AppCompatActivity() {
         }
 
 
-        // Show a centered fullscreen splash (tvSplash) while we prepare the screen
+        // Splash
         val fallback = FirebaseSingleton.auth.currentUser?.displayName
             ?: FirebaseSingleton.auth.currentUser?.email ?: getString(R.string.hello)
 
@@ -76,41 +73,39 @@ class HomeTrainer : AppCompatActivity() {
         binding.splashOverlay.visibility = View.VISIBLE
         binding.splashOverlay.alpha = 1f
 
-        // Simple entrance animation for the splash text
+        // Animazioa
         binding.tvSplash.alpha = 0f
         binding.tvSplash.scaleX = 0.95f
         binding.tvSplash.scaleY = 0.95f
         binding.tvSplash.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(400).start()
 
-        // Start loading user data immediately in background; update splash text when ready.
-        // We will keep the splash visible until either the name arrives or a timeout elapses.
+        // Display denbora eta izena kargatzeko denbora-muga
         val splashDisplayMs = 1800L
         val hideDelayAfterNameMs = 800L
 
-        // Runnable to hide the overlay (used as timeout fallback)
+        // Runnable splash ezkutatzeko
         hideRunnable = Runnable {
-            Log.d("HomeTrainer", "hideRunnable executing: starting hide animation")
+            Log.d("HomeTrainer", "hideRunnable exekutatzen: animazioa hasieratzen")
             binding.splashOverlay.animate().alpha(0f).setDuration(350).withEndAction {
                 binding.splashOverlay.visibility = View.GONE
-                Log.d("HomeTrainer", "splashOverlay is now GONE")
+                Log.d("HomeTrainer", "splashOverlay bukatuta")
             }.start()
         }
 
-        // Schedule the fallback hide
         hideRunnable?.let {
             Log.d("HomeTrainer", "Scheduling hideRunnable in $splashDisplayMs ms")
             binding.splashOverlay.postDelayed(it, splashDisplayMs)
         }
 
-        // Try to load user's display name (or username) to show on the splash and re-schedule a shorter hide
+        // Erabiltzailearen izena kargatu
         FirebaseSingleton.auth.currentUser?.uid?.let { uid ->
             FirebaseSingleton.db.collection("users").document(uid).get()
                 .addOnSuccessListener { doc ->
                     val name = doc.getString("username") ?: doc.getString("name") ?: fallback
-                    Log.d("HomeTrainer", "Loaded user name for uid=$uid -> $name")
+                    Log.d("HomeTrainer", "Erabiltzailea kargatuta uid-rekin=$uid -> $name")
                     if (binding.splashOverlay.isVisible) {
                         binding.tvSplash.text = getString(R.string.hello_name, name)
-                        // cancel previous hide and schedule a short delay so the user sees the real name
+                        // Kendu aurreko ezkutatze runnable-a eta denboratu berriro izena erakutsi ondoren
                         hideRunnable?.let {
                             binding.splashOverlay.removeCallbacks(it)
                             binding.splashOverlay.postDelayed(it, hideDelayAfterNameMs)
@@ -118,13 +113,13 @@ class HomeTrainer : AppCompatActivity() {
                     }
                 }
                 .addOnFailureListener { e ->
-                    Log.e("HomeTrainer", "Failed to load user doc uid=$uid: ${e.message}")
+                    Log.e("HomeTrainer", "Errorea Erabiltzailea kargatzen uid-rekin=$uid: ${e.message}")
                 }
         }
         binding.spOrder.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 selectedLevelChoice = levels[position]
-                Log.d("Spinner", "Usuario seleccionó: $selectedLevelChoice")
+                Log.d("Spinner", "Erabiltzailea aukeratuta: $selectedLevelChoice")
                 if (binding.spOrder.selectedItem == "Guztiak") {
                     loadAllWorkouts { workoutList ->
                         initAdapter(workoutList)
@@ -163,29 +158,29 @@ class HomeTrainer : AppCompatActivity() {
             }
             binding.btnEditWorkout.setOnClickListener {
                 if (selectedWorkout != null) {
-                    Log.i("","Editing workout: ${selectedWorkout!!.id} - ${selectedWorkout!!.name}")
+                    Log.i("","Workout editatzen: ${selectedWorkout!!.id} - ${selectedWorkout!!.name}")
                     showEditWorkoutDialog(workoutList,prevSelectedPosition)
                     workoutAdapter.notifyItemChanged(prevSelectedPosition)
                 } else {
-                    Toast.makeText(this, "Selecciona un entrenamiento primero", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Aukeratu workout bat, mesedez", Toast.LENGTH_SHORT).show()
                 }
             }
             binding.btnDeleteWorkout.setOnClickListener {
                 if (selectedWorkout != null) {
-                    Log.i("","Deleting workout: ${selectedWorkout!!.id} - ${selectedWorkout!!.name}")
+                    Log.i("","Workout ezabatzen: ${selectedWorkout!!.id} - ${selectedWorkout!!.name}")
                     deleteWorkout(selectedWorkout!!.id)
                     workoutList.remove(selectedWorkout)
                     workoutAdapter.notifyItemChanged(prevSelectedPosition)
                     selectedWorkout = null
                     prevSelectedPosition = -1
                 } else {
-                    Toast.makeText(this, "Selecciona un entrenamiento primero", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Aukeratu workout bat, mesedez", Toast.LENGTH_SHORT).show()
                 }
             }
         }
 
     override fun onDestroy() {
-        // remove any pending callbacks to avoid running after the activity is destroyed
+        // Ezkutatu runnable pendienteak kentzea
         hideRunnable?.let {
             Log.d("HomeTrainer", "Removing pending hideRunnable callbacks in onDestroy")
             binding.splashOverlay.removeCallbacks(it)
@@ -208,13 +203,13 @@ class HomeTrainer : AppCompatActivity() {
                     workoutsMap[document.id] = workout
                     workout.id = document.id
                     workoutList.add(workout)
-                    Log.d("HomeTrainer", "Workout loaded: ${document.id} ->) $workout")
+                    Log.d("HomeTrainer", "Workout kargatuta: ${document.id} ->) $workout")
                 }
-                Log.d("HomeTrainer", "Workout size = ${workoutsMap.size} ")
+                Log.d("HomeTrainer", "Workouts tamaina = ${workoutsMap.size} ")
                 callback(workoutList)
             }
             .addOnFailureListener { exception ->
-                Log.w("HomeTrainer", "Error getting workouts: ", exception)
+                Log.w("HomeTrainer", "Errorea workouts eskuratzen: ", exception)
                 callback(mutableListOf())
             }
     }
@@ -223,11 +218,11 @@ class HomeTrainer : AppCompatActivity() {
         val docRef = db.collection("workouts").document() // ID generado
         val batch = db.batch()
 
-        // asignamos el id generado al objeto (no se serializará por @get:Exclude)
+        // Id asignatzen dugu baina ez da Firestore-ra igoko (getExclude)
         workout.id = docRef.id
-        Log.i("","Adding workout with generated ID: ${workout.id}, aaaaaaaaaaa: ${docRef.id}")
+        Log.i("","Workout igotzen: ${workout.id}, ${docRef.id}")
 
-        // `ariketak` está excluido por @get:Exclude, por tanto solo se subirán los campos restantes
+        // `ariketak` ez da igoko, soilik `workout` dokumentua
         batch.set(docRef, workout)
 
         val exercises = workout.ariketak
@@ -238,18 +233,18 @@ class HomeTrainer : AppCompatActivity() {
 
         batch.commit()
             .addOnSuccessListener {
-                Log.d("HomeClient", "Workout y ${exercises.size} exercises añadidos con ID: ${docRef.id}")
+                Log.d("HomeClient", "Workout e ${exercises.size} exercises gehituta. ID: ${docRef.id}")
             }
             .addOnFailureListener { e ->
-                Log.w("HomeClient", "Error añadiendo workout y exercises", e)
+                Log.w("HomeClient", "Errorea workout gehitzen", e)
             }
     }
 
     private fun editWorkout(workout: Workout) {
         val db = FirebaseSingleton.db
-        Log.i("","Editing workout in dialog: ${workout.id} -------------- ${workout.name}")
+        Log.i("","Workout editatzen Dialog-ean: ${workout.id} -------------- ${workout.name}")
         if (workout.id.isBlank()) {
-            Log.w("HomeClient", "editWorkout: workout.id está vacío, no se puede actualizar")
+            Log.w("HomeClient", "editWorkout: workout.id hutsa dago, ezin da eguneratu")
             return
         }
 
@@ -262,10 +257,10 @@ class HomeTrainer : AppCompatActivity() {
             "video", workout.video
         )
             .addOnSuccessListener {
-                Log.d("HomeClient", "Workout actualizado correctamente id=${workout.id}")
+                Log.d("HomeClient", "Workout ondo eguneratuta id=${workout.id}")
             }
             .addOnFailureListener { e ->
-                Log.w("HomeClient", "Error actualizando workout id=${workout.id}", e)
+                Log.w("HomeClient", "Error workout eguneratzen id=${workout.id}", e)
             }
     }
 
@@ -273,7 +268,7 @@ class HomeTrainer : AppCompatActivity() {
         val db = FirebaseSingleton.db
 
         if (workoutId.isBlank()) {
-            Log.w("HomeClient", "deleteWorkout: workoutId está vacío, no se puede eliminar")
+            Log.w("HomeClient", "deleteWorkout: workoutId hutsa dago eta ezin da ezabatu")
             return
         }
 
@@ -281,10 +276,10 @@ class HomeTrainer : AppCompatActivity() {
 
         workoutRef.delete()
             .addOnSuccessListener {
-                Log.d("HomeClient", "Workout eliminado correctamente id=$workoutId")
+                Log.d("HomeClient", "Workout ondo ezabatuta id=$workoutId")
             }
             .addOnFailureListener { e ->
-                Log.w("HomeClient", "Error eliminando workout id=$workoutId", e)
+                Log.w("HomeClient", "Errorea workout ezabatzen id=$workoutId", e)
             }
     }
 

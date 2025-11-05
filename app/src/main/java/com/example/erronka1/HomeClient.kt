@@ -6,7 +6,6 @@ import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -14,26 +13,18 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import com.example.erronka1.db.FirebaseSingleton
 import com.example.erronka1.databinding.ActivityHomeClientBinding
-import com.example.erronka1.databinding.ActivityUserProfileBinding
 import com.example.erronka1.model.Workout
-import com.example.erronka1.model.Historic
 import com.example.erronka1.model.User
-import com.example.erronka1.rvHistoric.HistoricAdapter
-import com.example.erronka1.rvWorkout.WorkoutAdapter
 
 class HomeClient : AppCompatActivity() {
 
     private lateinit var binding: ActivityHomeClientBinding
     private var hideRunnable: Runnable? = null
     private var currentUser: User? = null
-    private lateinit var workoutAdapter: WorkoutAdapter
-    private lateinit var historicAdapter: HistoricAdapter
-    private lateinit var selectedWorkout: Workout
-    private lateinit var selectedHistoric: Historic
+
     private var levels = listOf("Guztiak", "1", "2", "3", "4", "5")
     private var selectedLevelChoice: String = levels[0]
-    private var historicList = listOf<Historic>()
-    private var prevSelectedPosition = -1
+
     private lateinit var methods: Methods
 
 
@@ -55,44 +46,38 @@ class HomeClient : AppCompatActivity() {
             return@setOnApplyWindowInsetsListener insets
         }
 
-        // Show a centered fullscreen splash (tvSplash) while we prepare the screen
+        // Erakusten du Splash overlay-a erabiltzailearen izena kargatu arte edo denbora-muga bat igaro arte
         val fallback = FirebaseSingleton.auth.currentUser?.displayName
             ?: FirebaseSingleton.auth.currentUser?.email ?: getString(R.string.hello)
 
-        // Set the splash text (e.g., "Hola <fallback>") and ensure the overlay is visible
+        // Konfiguratu hasierako splash testua
         binding.tvSplash.text = getString(R.string.hello_name, fallback)
         binding.splashOverlay.visibility = View.VISIBLE
         binding.splashOverlay.alpha = 1f
-
-        // Hide header elements initially (they will be shown after splash)
         binding.ivBacktoLogin.visibility = View.GONE
-        //binding.tvTitle.visibility = View.GONE
         binding.rvWorkouts.visibility = View.GONE
-        //binding.tvNoWorkouts.visibility = View.GONE
 
-        // Simple entrance animation for the splash text
+        // Animazioa testuaren agerpenerako
         binding.tvSplash.alpha = 0f
         binding.tvSplash.scaleX = 0.95f
         binding.tvSplash.scaleY = 0.95f
         binding.tvSplash.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(400).start()
 
-        // Start loading user data immediately in background; update splash text when ready.
-        // We will keep the splash visible until either the name arrives or a timeout elapses.
+        // Display denbora eta izena kargatzeko denbora-muga
         val splashDisplayMs = 1800L
         val hideDelayAfterNameMs = 800L
 
-        // Runnable to hide the overlay (used as timeout fallback)
+        // Runnable splash ezkutatzeko
         hideRunnable = Runnable {
             binding.splashOverlay.animate().alpha(0f).setDuration(350).withEndAction {
                 binding.splashOverlay.visibility = View.GONE
-                // Show header elements after splash is hidden
                 binding.ivBacktoLogin.visibility = View.VISIBLE
                 binding.rvWorkouts.visibility = View.VISIBLE
                 binding.rvHistorics.visibility = View.VISIBLE
             }.start()
         }
 
-        // Schedule the fallback hide
+        // Denboratu splash ezkutatzea
         hideRunnable?.let { binding.splashOverlay.postDelayed(it, splashDisplayMs) }
 
         FirebaseSingleton.auth.currentUser?.uid?.let { uid ->
@@ -100,10 +85,10 @@ class HomeClient : AppCompatActivity() {
                 .addOnSuccessListener { doc ->
                     val name = doc.getString("username") ?: doc.getString("name") ?: fallback
                     Log.d("HomeClient", "Loaded user name for uid=$uid -> $name")
-                    // Update the splash text to real name if still visible
+                    // Eguneratu splash testua izenarekin
                     if (binding.splashOverlay.isVisible) {
                         binding.tvSplash.text = getString(R.string.hello_name, name)
-                        // cancel the previous hide and schedule a short delay so the user sees the real name
+                        // Kendu aurreko ezkutatze runnable-a eta denboratu berriro izena erakutsi ondoren
                         hideRunnable?.let {
                             binding.splashOverlay.removeCallbacks(it)
                             binding.splashOverlay.postDelayed(it, hideDelayAfterNameMs)
@@ -132,18 +117,16 @@ class HomeClient : AppCompatActivity() {
 
 
     override fun onDestroy() {
-        // remove any pending callbacks to avoid running after the activity is destroyed
+        // Callback ezabatzea memoria ihesak saihesteko
         hideRunnable?.let { binding.splashOverlay.removeCallbacks(it) }
         super.onDestroy()
     }
 
 
     private fun loadAllWorkouts(callback: (MutableList<Workout>) -> Unit) {
-        // Get user lvl to filter workouts
+
         val db = FirebaseSingleton.db
-
         val workoutList: MutableList<Workout> = mutableListOf()
-
         val workoutsMap = mutableMapOf<String, Workout>()
         db.collection("workouts")
             .get()
@@ -153,13 +136,13 @@ class HomeClient : AppCompatActivity() {
                     workout.id = document.id
                     workoutsMap[document.id] = workout
                     workoutList.add(workout)
-                    Log.d("HomeTrainer", "Workout loaded: ${document.id} ->) $workout")
+                    Log.d("HomeTrainer", "Workout kargatuta: ${document.id} ->) $workout")
                 }
-                Log.d("HomeTrainer", "Workout size = ${workoutsMap.size} ")
+                Log.d("HomeTrainer", "Workouts tamaina = ${workoutsMap.size} ")
                 callback(workoutList)
             }
             .addOnFailureListener { exception ->
-                Log.w("HomeTrainer", "Error getting workouts: ", exception)
+                Log.w("HomeTrainer", "Errorea workouts eskuratzen: ", exception)
                 callback(mutableListOf())
             }
     }
@@ -174,13 +157,13 @@ class HomeClient : AppCompatActivity() {
                         currentUser = document.toObject(User::class.java)
                         val userLevel = currentUser?.level ?: 1
 
-                        // Filtrar niveles hasta el nivel del usuario
+                        // Erabiltzailearen mailara arteko mailak lortu
                         val availableLevels = mutableListOf("Guztiak")
                         for (i in 1..userLevel) {
                             availableLevels.add(i.toString())
                         }
 
-                        // Configurar el spinner con los niveles disponibles
+                        // Konfiguratu Spinner maila aukerarekin
                         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, availableLevels)
                         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                         binding.spOrder.adapter = adapter
@@ -190,7 +173,7 @@ class HomeClient : AppCompatActivity() {
                                 binding.rvHistorics.visibility = View.GONE
                                 binding.tvNoHistorics.visibility = View.GONE
                                 selectedLevelChoice = availableLevels[position]
-                                Log.d("Spinner", "Usuario seleccionó: $selectedLevelChoice")
+                                Log.d("Spinner", "Erabiltzaileak aukeratutakoa: $selectedLevelChoice")
 
                                 if (selectedLevelChoice == "Guztiak") {
                                     loadAllWorkouts { workoutList ->
@@ -201,7 +184,7 @@ class HomeClient : AppCompatActivity() {
                                         val filteredWorkouts = workoutList.filter {
                                             it.level == selectedLevelChoice.toInt()
                                         }.toMutableList()
-                                        Log.i("", "--------------${filteredWorkouts.toString()}")
+                                        Log.i("", "--------------${filteredWorkouts}")
                                         methods.initAdapterWorkoutsAndHistorics(filteredWorkouts, binding)
                                     }
                                 }
@@ -209,14 +192,14 @@ class HomeClient : AppCompatActivity() {
                             override fun onNothingSelected(p0: AdapterView<*>?) {}
                         }
 
-                        // Cargar workouts inicialmente con "Guztiak"
+                        // Lehenengo karga "Guztiak" da defektuz
                         loadAllWorkouts { workoutList ->
                             methods.initAdapterWorkoutsAndHistorics(workoutList, binding)
                         }
                     }
                 }
                 .addOnFailureListener { e ->
-                    Log.e("HomeClient", "Error loading user data: ${e.message}")
+                    Log.e("HomeClient", "Errorea erabiltzailearen datuak lortzen: ${e.message}")
                     setupSpinnerWithLevels(listOf("Guztiak", "1"))
                 }
         } else {

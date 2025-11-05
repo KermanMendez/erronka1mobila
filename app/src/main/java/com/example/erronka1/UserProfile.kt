@@ -1,9 +1,7 @@
 package com.example.erronka1
 
-import android.content.Context
 import android.content.res.Configuration
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -44,21 +42,20 @@ class UserProfile : AppCompatActivity() {
                     if (document.exists()) {
                         currentUser = document.toObject(User::class.java)
                         currentUser?.let { user ->
-                            binding.editTextName.setText(user.name ?: "")
-                            binding.editTextSurname.setText(user.surname ?: "")
-                            binding.editTextSurname2.setText(user.surname2 ?: "")
-                            binding.editTextBirthdate.setText(user.birthdate ?: "")
+                            binding.editTextName.setText(user.name)
+                            binding.editTextSurname.setText(user.surname)
+                            binding.editTextSurname2.setText(user.surname2)
+                            binding.editTextBirthdate.text = user.birthdate
                         }
                     }
                 }
                 .addOnFailureListener { e ->
-                    Toast.makeText(this, "Error loading profile: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Errorea profila kargatzen: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
         }
     }
 
     private fun updateUserProfile() {
-        Log.d("UserProfile", "Updating user:")
         currentUser?.let { user ->
 
             user.name = binding.editTextName.text.toString().trim()
@@ -73,10 +70,10 @@ class UserProfile : AppCompatActivity() {
                 FirebaseSingleton.db.collection("users").document(authUser.uid)
                     .set(user)
                     .addOnSuccessListener {
-                        Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Profila ondo eguneratuta", Toast.LENGTH_SHORT).show()
                     }
                     .addOnFailureListener { e ->
-                        Toast.makeText(this, "Error updating profile: ${e.message}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Errorea profila eguneratzen: ${e.message}", Toast.LENGTH_SHORT).show()
                     }
             }
         }
@@ -85,11 +82,12 @@ class UserProfile : AppCompatActivity() {
     private fun setupUpdateButton() {
         binding.btnSaveChanges.setOnClickListener {
             updateUserProfile()
-            Log.d("UserProfile", "Update button clicked")
+
         }
     }
+    @Suppress("DEPRECATION")
     private fun applyLanguage() {
-        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
         val languageCode = prefs.getString("selected_language", "eu") ?: "eu"
 
         val locale = Locale(languageCode)

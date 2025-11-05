@@ -239,7 +239,7 @@ class Methods (
             prevSelectedPosition = selectedPosition
 
             (context as AppCompatActivity).lifecycleScope.launch {
-                historicList = loadWorkoutHistorics(selectedWorkout.id)
+                historicList = loadWorkoutHistorics(selectedWorkout.id, binding)
 
                 historicAdapter = HistoricAdapter(historicList) { selectedPosition ->
                     selectedHistoric = historicList[selectedPosition]
@@ -273,8 +273,7 @@ class Methods (
         binding.rvWorkouts.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL,false)
         binding.rvWorkouts.adapter = workoutAdapter
     }
-    private suspend fun loadWorkoutHistorics(workoutId: String): List<Historic> {
-        val binding = ActivityHomeClientBinding.inflate(layoutInflater())
+    private suspend fun loadWorkoutHistorics(workoutId: String, binding: ActivityHomeClientBinding): List<Historic> {
         var result: List<Historic> = emptyList()
         val uid = FirebaseSingleton.auth.currentUser?.uid
         if (uid != null) {
@@ -326,7 +325,7 @@ class Methods (
                         // Oculta el RecyclerView y muestra el TextView con el mensaje
                         binding.rvHistorics.visibility = View.GONE
                         binding.tvNoHistorics.visibility = View.VISIBLE
-                        binding.tvNoHistorics.text = R.string.noHistoric.toString()
+                        binding.tvNoHistorics.setText(R.string.noHistoric)
                     }
                 }
             } catch (e: Exception) {

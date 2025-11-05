@@ -158,7 +158,7 @@ class HomeClient : AppCompatActivity() {
                         val filteredWorkouts =
                             workoutList.filter { it.level == selectedLevelChoice.toInt() }.toMutableList()
                         Log.i("","--------------${filteredWorkouts.toString()}")
-                        initAdapter(filteredWorkouts)
+                        methods.initAdapterWorkoutsAndHistorics(filteredWorkouts,binding)
                     }
                 }
             }
@@ -294,61 +294,6 @@ class HomeClient : AppCompatActivity() {
         return result
     }
 
-
-    private fun loadUserData(profileBinding: ActivityUserProfileBinding) {
-        val authUser = FirebaseSingleton.auth.currentUser
-
-        if (authUser != null) {
-            FirebaseSingleton.db.collection("users").document(authUser.uid)
-                .get()
-                .addOnSuccessListener { document ->
-                    if (document.exists()) {
-                        currentUser = document.toObject(User::class.java)
-                        currentUser?.let { user ->
-                            profileBinding.editTextName.setText(user.name)
-                            profileBinding.editTextSurname.setText(user.surname)
-                            profileBinding.editTextSurname2.setText(user.surname2)
-                            profileBinding.editTextBirthdate.text = user.birthdate
-                        }
-                    }
-                }
-                .addOnFailureListener { e ->
-                    Toast.makeText(this, "Error loading profile: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-        }
-    }
-
-    private fun updateUserProfile(profileBinding: ActivityUserProfileBinding) {
-        Log.d("UserProfile", "Updating user:")
-        currentUser?.let { user ->
-
-            user.name = profileBinding.editTextName.text.toString().trim()
-            user.surname = profileBinding.editTextSurname.text.toString().trim()
-            user.surname2 = profileBinding.editTextSurname2.text.toString().trim()
-            user.birthdate = profileBinding.editTextBirthdate.text.toString().trim()
-
-
-
-            val authUser = FirebaseSingleton.auth.currentUser
-            if (authUser != null) {
-                FirebaseSingleton.db.collection("users").document(authUser.uid)
-                    .set(user)
-                    .addOnSuccessListener {
-                        Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show()
-                    }
-                    .addOnFailureListener { e ->
-                        Toast.makeText(this, "Error updating profile: ${e.message}", Toast.LENGTH_SHORT).show()
-                    }
-            }
-        }
-    }
-
-    private fun setupUpdateButton(profileBinding: ActivityUserProfileBinding) {
-        profileBinding.btnSaveChanges.setOnClickListener {
-            updateUserProfile(profileBinding)
-            Log.d("UserProfile", "Update button clicked")
-        }
-    }
 
     private fun orderWorkouts() {
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, levels)

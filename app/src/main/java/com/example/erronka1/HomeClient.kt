@@ -26,6 +26,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlin.text.get
+import kotlin.toString
 
 class HomeClient : AppCompatActivity() {
 
@@ -45,7 +47,6 @@ class HomeClient : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         methods = Methods(this) {
-            // Qué pasa al cerrar sesión
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
             finish()
@@ -96,10 +97,6 @@ class HomeClient : AppCompatActivity() {
                 binding.ivBacktoLogin.visibility = View.VISIBLE
                 binding.rvWorkouts.visibility = View.VISIBLE
                 binding.rvHistorics.visibility = View.VISIBLE
-                //binding.tvTitle.visibility = View.VISIBLE
-                // Setup RecyclerView and load workouts AFTER splash is hidden
-                //setupRecyclerView()
-                //showWorkouts()
             }.start()
         }
 
@@ -123,12 +120,9 @@ class HomeClient : AppCompatActivity() {
                 }
                 .addOnFailureListener { e ->
                     Log.e("HomeClient", "Failed to load user doc uid=$uid: ${e.message}")
-                    // let the original timeout hide the splash
                 }
-        } /*?: run {
-            Log.d("HomeClient", "No auth UID available; using fallback for welcome")
-            // Keep the splash showing the fallback; the hideRunnable will remove it after timeout
-        }*/
+        }
+
         orderWorkouts()
         binding.ivBacktoLogin.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
@@ -142,59 +136,8 @@ class HomeClient : AppCompatActivity() {
         binding.ivSettings.setOnClickListener {
             methods.showSettingsDialog()
         }
-
-
-        binding.spOrder.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                binding.rvHistorics.visibility = View.GONE
-                selectedLevelChoice = levels[position]
-                Log.d("Spinner", "Usuario seleccionó: $selectedLevelChoice")
-                if (binding.spOrder.selectedItem == "Guztiak") {
-                     loadAllWorkouts { workoutList ->
-                         methods.initAdapterWorkoutsAndHistorics(workoutList,binding)
-                    }
-                } else {
-                    loadAllWorkouts { workoutList ->
-                        val filteredWorkouts =
-                            workoutList.filter { it.level == selectedLevelChoice.toInt() }.toMutableList()
-                        Log.i("","--------------${filteredWorkouts.toString()}")
-                        initAdapter(filteredWorkouts)
-                    }
-                }
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-        }
     }
-    private fun initAdapter(workoutList: MutableList<Workout>) {
-        workoutAdapter = WorkoutAdapter(workoutList) { selectedPosition ->
-            if (::selectedWorkout.isInitialized) {
-                if (selectedWorkout.isSelected && prevSelectedPosition != -1) {
-                    selectedWorkout.isSelected = false
-                    workoutAdapter.notifyItemChanged(prevSelectedPosition)
-                }
-            }
-            selectedWorkout = workoutList[selectedPosition]
-            selectedWorkout.isSelected = true
-            workoutAdapter.notifyItemChanged(selectedPosition)
-            prevSelectedPosition = selectedPosition
 
-            lifecycleScope.launch {
-                historicList = loadWorkoutHistorics(selectedWorkout.id)
-
-                historicAdapter = HistoricAdapter(historicList) { selectedPosition ->
-                    selectedHistoric = historicList[selectedPosition]
-                    Log.d("", "Selected historic: $selectedHistoric")
-                }
-                binding.rvHistorics.layoutManager = LinearLayoutManager(this@HomeClient, LinearLayoutManager.VERTICAL,false)
-                binding.rvHistorics.adapter = historicAdapter
-                binding.rvHistorics.visibility = View.VISIBLE
-            }
-        }
-        binding.rvWorkouts.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL,false)
-        binding.rvWorkouts.adapter = workoutAdapter
-        Log.d("", "Historics"+historicList.toString())
-    }
 
     override fun onDestroy() {
         // remove any pending callbacks to avoid running after the activity is destroyed
@@ -229,70 +172,7 @@ class HomeClient : AppCompatActivity() {
             }
     }
 
-    private suspend fun loadWorkoutHistorics(workoutId: String): List<Historic> {
-        var result: List<Historic> = emptyList()
-        val uid = FirebaseSingleton.auth.currentUser?.uid
-        if (uid != null) {
-            val db = FirebaseSingleton.db
-            try {
-                val query = db.collection("users")
-                    .document(uid)
-                    .collection("historic")
-                    .whereEqualTo("workoutId", workoutId)
-                    .orderBy("date", com.google.firebase.firestore.Query.Direction.DESCENDING)
-                    .get()
-                    .await()
 
-                if (!query.isEmpty) {
-                    binding.tvNoHistorics.visibility = View.GONE
-                    val list = mutableListOf<Historic>()
-                    for (doc in query.documents) {
-                        val h = Historic(
-                            id = doc.id,
-                            workoutId = doc.getString("workoutId") ?: "",
-                            workoutTitle = "",
-                            date = doc.getString("date") ?: "",
-                            totalTime = doc.getLong("totalTime")?.toInt() ?: 0,
-                            totalReps = doc.getLong("totalReps")?.toInt() ?: 0,
-                            completed = doc.getBoolean("completed") ?: false
-                        )
-                        list.add(h)
-                    }
-
-                    if (workoutId.isNotBlank()) {
-                        try {
-                            val workoutDoc = db.collection("workouts").document(workoutId).get().await()
-                            val title = workoutDoc.getString("name")
-                                ?: workoutDoc.getString("title")
-                                ?: "Workout desconocido"
-                            for (h in list) h.workoutTitle = title
-                        } catch (e: Exception) {
-                            Log.w("HomeClient", "Failed to load workout title for $workoutId", e)
-                            for (h in list) h.workoutTitle = "Workout desconocido"
-                        }
-                    } else {
-                        for (h in list) h.workoutTitle = "Workout desconocido"
-                    }
-
-                    result = list
-                } else {
-                    Log.d("HomeClient", "No historic entries for workoutId=$workoutId")
-                    withContext(Dispatchers.Main) {
-                        // Oculta el RecyclerView y muestra el TextView con el mensaje
-                        binding.rvHistorics.visibility = View.GONE
-                        binding.tvNoHistorics.visibility = View.VISIBLE
-                        binding.tvNoHistorics.text = getString(R.string.noHistoric)
-                    }
-                }
-            } catch (e: Exception) {
-                Log.w("HomeClient", "Error loading historic list for workoutId=$workoutId", e)
-            }
-        } else {
-            Log.w("HomeClient", "No authenticated user")
-        }
-
-        return result
-    }
 
 
     private fun loadUserData(profileBinding: ActivityUserProfileBinding) {
@@ -351,12 +231,73 @@ class HomeClient : AppCompatActivity() {
     }
 
     private fun orderWorkouts() {
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, levels)
+        val authUser = FirebaseSingleton.auth.currentUser
+        if (authUser != null) {
+            FirebaseSingleton.db.collection("users").document(authUser.uid)
+                .get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        currentUser = document.toObject(User::class.java)
+                        val userLevel = currentUser?.level ?: 1
+
+                        // Filtrar niveles hasta el nivel del usuario
+                        val availableLevels = mutableListOf("Guztiak")
+                        for (i in 1..userLevel) {
+                            availableLevels.add(i.toString())
+                        }
+
+                        // Configurar el spinner con los niveles disponibles
+                        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, availableLevels)
+                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                        binding.spOrder.adapter = adapter
+
+                        binding.spOrder.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                                binding.rvHistorics.visibility = View.GONE
+                                binding.tvNoHistorics.visibility = View.GONE
+                                selectedLevelChoice = availableLevels[position]
+                                Log.d("Spinner", "Usuario seleccionó: $selectedLevelChoice")
+
+                                if (selectedLevelChoice == "Guztiak") {
+                                    loadAllWorkouts { workoutList ->
+                                        methods.initAdapterWorkoutsAndHistorics(workoutList, binding)
+                                    }
+                                } else {
+                                    loadAllWorkouts { workoutList ->
+                                        val filteredWorkouts = workoutList.filter {
+                                            it.level == selectedLevelChoice.toInt()
+                                        }.toMutableList()
+                                        Log.i("", "--------------${filteredWorkouts.toString()}")
+                                        methods.initAdapterWorkoutsAndHistorics(filteredWorkouts, binding)
+                                    }
+                                }
+                            }
+                            override fun onNothingSelected(p0: AdapterView<*>?) {}
+                        }
+
+                        // Cargar workouts inicialmente con "Guztiak"
+                        loadAllWorkouts { workoutList ->
+                            methods.initAdapterWorkoutsAndHistorics(workoutList, binding)
+                        }
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e("HomeClient", "Error loading user data: ${e.message}")
+                    setupSpinnerWithLevels(listOf("Guztiak", "1"))
+                }
+        } else {
+            setupSpinnerWithLevels(listOf("Guztiak", "1"))
+        }
+    }
+
+    private fun setupSpinnerWithLevels(levelsList: List<String>) {
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, levelsList)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spOrder.adapter = adapter
+
         binding.spOrder.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                selectedLevelChoice = levels[position]
+                selectedLevelChoice = levelsList[position]
             }
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }

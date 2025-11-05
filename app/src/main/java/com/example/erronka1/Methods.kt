@@ -31,6 +31,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.util.Locale
+import kotlin.text.get
+import kotlin.text.toInt
 
 class Methods (
     private val context: Context,
@@ -239,7 +241,8 @@ class Methods (
             prevSelectedPosition = selectedPosition
 
             (context as AppCompatActivity).lifecycleScope.launch {
-                historicList = loadWorkoutHistorics(selectedWorkout.id)
+                // AQUÍ es donde debes poner la línea que mencionas:
+                historicList = loadWorkoutHistorics(selectedWorkout.id, binding)
 
                 historicAdapter = HistoricAdapter(historicList) { selectedPosition ->
                     selectedHistoric = historicList[selectedPosition]
@@ -253,7 +256,6 @@ class Methods (
         binding.rvWorkouts.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL,false)
         binding.rvWorkouts.adapter = workoutAdapter
         binding.rvWorkouts.visibility = View.VISIBLE
-        Log.d("", "Historics"+historicList.toString())
     }
 
     public fun initAdapterWorkouts(workoutList: MutableList<Workout>, binding: ActivityHomeTrainerBinding) {
@@ -273,10 +275,10 @@ class Methods (
         binding.rvWorkouts.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL,false)
         binding.rvWorkouts.adapter = workoutAdapter
     }
-    private suspend fun loadWorkoutHistorics(workoutId: String): List<Historic> {
-        val binding = ActivityHomeClientBinding.inflate(layoutInflater())
+    private suspend fun loadWorkoutHistorics(workoutId: String, binding: ActivityHomeClientBinding): List<Historic> {
         var result: List<Historic> = emptyList()
         val uid = FirebaseSingleton.auth.currentUser?.uid
+
         if (uid != null) {
             val db = FirebaseSingleton.db
             try {
@@ -289,13 +291,16 @@ class Methods (
                     .await()
 
                 if (!query.isEmpty) {
-                    binding.tvNoHistorics.visibility = View.GONE
+                    withContext(Dispatchers.Main) {
+                        binding.tvNoHistorics.visibility = View.GONE
+                    }
+
                     val list = mutableListOf<Historic>()
                     for (doc in query.documents) {
                         val h = Historic(
                             id = doc.id,
                             workoutId = doc.getString("workoutId") ?: "",
-                            workoutTitle = "",
+                            workoutTitle = "", // Se establecerá después
                             date = doc.getString("date") ?: "",
                             totalTime = doc.getLong("totalTime")?.toInt() ?: 0,
                             totalReps = doc.getLong("totalReps")?.toInt() ?: 0,
@@ -304,36 +309,40 @@ class Methods (
                         list.add(h)
                     }
 
+                    // Cargar el título del workout
                     if (workoutId.isNotBlank()) {
                         try {
                             val workoutDoc = db.collection("workouts").document(workoutId).get().await()
                             val title = workoutDoc.getString("name")
                                 ?: workoutDoc.getString("title")
                                 ?: "Workout desconocido"
-                            for (h in list) h.workoutTitle = title
+                            for (h in list) {
+                                h.workoutTitle = title
+                            }
                         } catch (e: Exception) {
-                            Log.w("HomeClient", "Failed to load workout title for $workoutId", e)
-                            for (h in list) h.workoutTitle = "Workout desconocido"
+                            Log.w("Methods", "Failed to load workout title for $workoutId", e)
+                            for (h in list) {
+                                h.workoutTitle = "Workout desconocido"
+                            }
                         }
                     } else {
-                        for (h in list) h.workoutTitle = "Workout desconocido"
+                        for (h in list) {
+                            h.workoutTitle = "Workout desconocido"
+                        }
                     }
 
                     result = list
                 } else {
-                    Log.d("HomeClient", "No historic entries for workoutId=$workoutId")
+                    Log.d("Methods", "No historic entries for workoutId=$workoutId")
                     withContext(Dispatchers.Main) {
-                        // Oculta el RecyclerView y muestra el TextView con el mensaje
                         binding.rvHistorics.visibility = View.GONE
                         binding.tvNoHistorics.visibility = View.VISIBLE
-                        binding.tvNoHistorics.text = R.string.noHistoric.toString()
+                        binding.tvNoHistorics.text = context.getString(R.string.noHistoric)
                     }
                 }
             } catch (e: Exception) {
-                Log.w("HomeClient", "Error loading historic list for workoutId=$workoutId", e)
+                Log.w("Methods", "Error loading historic list for workoutId=$workoutId", e)
             }
-        } else {
-            Log.w("HomeClient", "No authenticated user")
         }
 
         return result

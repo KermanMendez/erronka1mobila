@@ -16,13 +16,13 @@ class HistoricViewHolder (view: View) : RecyclerView.ViewHolder(view) {
     fun render(historic: Historic) {
 
         tvWorkoutTitle.text = "Tituloa: "+historic.workoutTitle
-        tvDate.text = "Deskripzioa: "+historic.date
+        tvDate.text = "Data: "+historic.date
         tvTotalTime.text = "Denbora totala: "+historic.totalTime.toString()
-        tvTotalReps.text = "Errepikapen batura"+historic.totalReps.toString()
+        tvTotalReps.text = "Errepikapen batura: "+historic.totalReps.toString()
         if (historic.completed) {
-            tvCompleted.text = "Historikoa osatua dago"
+            tvCompleted.text = "Workout osatua: Bai"
         } else {
-            tvCompleted.text = "Historikoa osatu gabe dago"
+            tvCompleted.text = "Workout osatua: Ez"
         }
 
     }

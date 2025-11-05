@@ -1,6 +1,5 @@
 package com.example.erronka1
 
-
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -99,8 +98,7 @@ class Login : AppCompatActivity() {
                     }
                 }
             }
-
-
+        
         binding.btnBack.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)

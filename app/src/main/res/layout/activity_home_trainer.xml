@@ -5,6 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="?android:colorBackground"
     tools:context=".HomeTrainer">
 
     <LinearLayout
@@ -13,13 +14,13 @@
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:background="@color/background_workout">
+        android:background="?attr/colorPrimary">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="10dp"
             android:text="@string/training"
-            android:textColor="@color/white"
+            android:textColor="?attr/colorOnPrimary"
             android:textSize="40sp"
             tools:ignore="VisualLintOverlap"/>
 
@@ -69,7 +70,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/order_arrow"
                     android:layout_margin="10dp"
-                    android:textColor="@color/black"
+                    android:textColor="?attr/colorOnBackground"
                     android:textStyle="bold"/>
             </LinearLayout>
             <LinearLayout
@@ -151,7 +152,7 @@
         android:id="@+id/splashOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white"
+        android:background="?android:colorBackground"
         android:clickable="true"
         android:focusable="true"
         app:layout_constraintTop_toTopOf="parent"

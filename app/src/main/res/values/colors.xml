@@ -1,11 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="purple_200">#7613EF</color>
+    <!-- Colores básicos -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="purple_200">#FFBB86FC</color>
 
-    <color name="background_workout">#FF081A4A</color>
-    <color name="background_disabled">#2E3F56</color>
+    <!-- Colores personalizados -->
+    <!-- Ajustados: tonos más oscuros para mejor contraste en tema claro -->
+    <color name="background_workout">#ECEFF1</color> <!-- antes #F5F5F5 -->
+    <color name="settings_text_title">#212121</color> <!-- antes #333333 -->
+    <color name="background_disabled">#4B4A4A</color> <!-- antes #E0E0E0 -->
 
-    <color name="settings_text_title">#000000</color>
+    <!-- Colores para tema claro -->
+    <color name="light_primary">#6200EE</color>
+    <color name="light_primary_variant">#3700B3</color>
+    <color name="light_secondary">#03DAC6</color>
+    <color name="light_secondary_variant">#018786</color>
+    <color name="light_background">#FFFFFF</color>
+    <color name="light_surface">#767676</color>
+    <color name="light_error">#B00020</color>
+    <color name="light_on_primary">#FFFFFF</color>
+    <color name="light_on_secondary">#000000</color>
+    <color name="light_on_background">#000000</color>
+    <color name="light_on_surface">#000000</color>
+    <color name="light_on_error">#FFFFFF</color>
+
+    <!-- Colores para tema oscuro -->
+    <color name="dark_primary">#BB86FC</color>
+    <color name="dark_primary_variant">#6200EE</color>
+    <color name="dark_secondary">#03DAC6</color>
+    <color name="dark_secondary_variant">#03DAC6</color>
+    <color name="dark_background">#121212</color>
+    <color name="dark_surface">#1E1E1E</color>
+    <color name="dark_error">#CF6679</color>
+    <color name="dark_on_primary">#000000</color>
+    <color name="dark_on_secondary">#000000</color>
+    <color name="dark_on_background">#FFFFFF</color>
+    <color name="dark_on_surface">#FFFFFF</color>
+    <color name="dark_on_error">#000000</color>
 </resources>

@@ -9,7 +9,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Erronka1" >
+        android:theme="@style/Theme.Erronka1Mobila" >
         <activity
             android:name=".UserProfile"
             android:exported="false" />

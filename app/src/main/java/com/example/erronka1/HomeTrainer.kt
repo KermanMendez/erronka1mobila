@@ -1,9 +1,7 @@
 package com.example.erronka1
 
 import android.app.Dialog
-import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -12,21 +10,17 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.erronka1.databinding.ActivityHomeTrainerBinding
 import com.example.erronka1.databinding.ActivityNewWorkoutBinding
-import com.example.erronka1.databinding.ActivitySettingsBinding
 import com.example.erronka1.databinding.ActivityUserProfileBinding
 import com.example.erronka1.db.FirebaseSingleton
 import com.example.erronka1.model.User
 import com.example.erronka1.model.Workout
 import com.example.erronka1.rvWorkout.WorkoutAdapter
-import androidx.core.content.edit
-import java.util.Locale
 
 class HomeTrainer : AppCompatActivity() {
 
@@ -358,75 +352,8 @@ class HomeTrainer : AppCompatActivity() {
         }
     }
 
-    private fun showProfileDialog() {
-
-        val profileBinding = ActivityUserProfileBinding.inflate(layoutInflater)
-
-        loadUserData(profileBinding)
-        setupUpdateButton(profileBinding)
 
 
-        val dialog = Dialog(this)
-        dialog.setContentView(profileBinding.root)
-        dialog.window!!.setLayout(1000, 1500)
-        dialog.show()
-        profileBinding.btnBackProfile.setOnClickListener {
-            dialog.cancel()
-        }
-    }
-    private fun loadUserData(profileBinding: ActivityUserProfileBinding) {
-        val authUser = FirebaseSingleton.auth.currentUser
-
-        if (authUser != null) {
-            FirebaseSingleton.db.collection("users").document(authUser.uid)
-                .get()
-                .addOnSuccessListener { document ->
-                    if (document.exists()) {
-                        currentUser = document.toObject(User::class.java)
-                        currentUser?.let { user ->
-                            profileBinding.editTextName.setText(user.name)
-                            profileBinding.editTextSurname.setText(user.surname)
-                            profileBinding.editTextSurname2.setText(user.surname2)
-                            profileBinding.editTextBirthdate.text = user.birthdate
-                        }
-                    }
-                }
-                .addOnFailureListener { e ->
-                    Toast.makeText(this, "Error loading profile: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-        }
-    }
-
-    private fun updateUserProfile(profileBinding: ActivityUserProfileBinding) {
-        Log.d("UserProfile", "Updating user:")
-        currentUser?.let { user ->
-
-            user.name = profileBinding.editTextName.text.toString().trim()
-            user.surname = profileBinding.editTextSurname.text.toString().trim()
-            user.surname2 = profileBinding.editTextSurname2.text.toString().trim()
-            user.birthdate = profileBinding.editTextBirthdate.text.toString().trim()
-
-
-
-            val authUser = FirebaseSingleton.auth.currentUser
-            if (authUser != null) {
-                FirebaseSingleton.db.collection("users").document(authUser.uid)
-                    .set(user)
-                    .addOnSuccessListener {
-                        Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show()
-                    }
-                    .addOnFailureListener { e ->
-                        Toast.makeText(this, "Error updating profile: ${e.message}", Toast.LENGTH_SHORT).show()
-                    }
-            }
-        }
-    }
-    private fun setupUpdateButton(profileBinding: ActivityUserProfileBinding) {
-        profileBinding.btnSaveChanges.setOnClickListener {
-            updateUserProfile(profileBinding)
-            Log.d("UserProfile", "Update button clicked")
-        }
-    }
     private fun orderWorkouts() {
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, levels)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)

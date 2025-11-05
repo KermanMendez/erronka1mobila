@@ -3,7 +3,6 @@ package com.example.erronka1
 import android.app.Dialog
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
-import android.content.Intent
 import android.content.res.Configuration
 import android.util.Log
 import android.view.View
@@ -13,7 +12,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.edit
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.erronka1.databinding.ActivityHomeClientBinding
@@ -31,8 +29,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.util.Locale
-import kotlin.text.get
-import kotlin.text.toInt
 
 class Methods (
     private val context: Context,
@@ -129,6 +125,8 @@ class Methods (
 
     public fun applyTheme() {
         val enabled = isDarkModeEnabled()
+
+        // Aplicar el tema personalizado según la preferencia del usuario
         AppCompatDelegate.setDefaultNightMode(
             if (enabled) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
         )

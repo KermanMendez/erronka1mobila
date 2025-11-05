@@ -12,8 +12,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
-import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.erronka1.db.FirebaseSingleton
 import com.example.erronka1.databinding.ActivityHomeClientBinding
 import com.example.erronka1.databinding.ActivityUserProfileBinding
@@ -22,12 +20,6 @@ import com.example.erronka1.model.Historic
 import com.example.erronka1.model.User
 import com.example.erronka1.rvHistoric.HistoricAdapter
 import com.example.erronka1.rvWorkout.WorkoutAdapter
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import kotlin.text.get
-import kotlin.toString
 
 class HomeClient : AppCompatActivity() {
 
@@ -51,8 +43,8 @@ class HomeClient : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
-        methods.applyLanguage()
-        methods.applyTheme()
+        Methods(this){}.applyLanguage()
+        Methods(this){}.applyTheme()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = ActivityHomeClientBinding.inflate(layoutInflater)
@@ -170,64 +162,6 @@ class HomeClient : AppCompatActivity() {
                 Log.w("HomeTrainer", "Error getting workouts: ", exception)
                 callback(mutableListOf())
             }
-    }
-
-
-
-
-    private fun loadUserData(profileBinding: ActivityUserProfileBinding) {
-        val authUser = FirebaseSingleton.auth.currentUser
-
-        if (authUser != null) {
-            FirebaseSingleton.db.collection("users").document(authUser.uid)
-                .get()
-                .addOnSuccessListener { document ->
-                    if (document.exists()) {
-                        currentUser = document.toObject(User::class.java)
-                        currentUser?.let { user ->
-                            profileBinding.editTextName.setText(user.name)
-                            profileBinding.editTextSurname.setText(user.surname)
-                            profileBinding.editTextSurname2.setText(user.surname2)
-                            profileBinding.editTextBirthdate.text = user.birthdate
-                        }
-                    }
-                }
-                .addOnFailureListener { e ->
-                    Toast.makeText(this, "Error loading profile: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-        }
-    }
-
-    private fun updateUserProfile(profileBinding: ActivityUserProfileBinding) {
-        Log.d("UserProfile", "Updating user:")
-        currentUser?.let { user ->
-
-            user.name = profileBinding.editTextName.text.toString().trim()
-            user.surname = profileBinding.editTextSurname.text.toString().trim()
-            user.surname2 = profileBinding.editTextSurname2.text.toString().trim()
-            user.birthdate = profileBinding.editTextBirthdate.text.toString().trim()
-
-
-
-            val authUser = FirebaseSingleton.auth.currentUser
-            if (authUser != null) {
-                FirebaseSingleton.db.collection("users").document(authUser.uid)
-                    .set(user)
-                    .addOnSuccessListener {
-                        Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show()
-                    }
-                    .addOnFailureListener { e ->
-                        Toast.makeText(this, "Error updating profile: ${e.message}", Toast.LENGTH_SHORT).show()
-                    }
-            }
-        }
-    }
-
-    private fun setupUpdateButton(profileBinding: ActivityUserProfileBinding) {
-        profileBinding.btnSaveChanges.setOnClickListener {
-            updateUserProfile(profileBinding)
-            Log.d("UserProfile", "Update button clicked")
-        }
     }
 
     private fun orderWorkouts() {
